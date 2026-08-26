@@ -28,9 +28,13 @@ you might actually take.
 
 | Command | Effect |
 | --- | --- |
-| `/brg` | List the available commands |
-| `/brg show` | Re-open a roll that was hidden |
+| `/brg` | Open the settings panel and list these commands |
 | `/brg config` | Open the settings panel |
+| `/brg show` | Bring back a roll that was hidden |
+| `/brg hide` | Hide the bonus roll showing right now |
+| `/brg toggle` | Turn filtering on or off |
+| `/brg status` | List what is currently filtered |
+| `/brg help` | List these commands |
 
 `/bonusrollgate` works anywhere `/brg` does.
 
@@ -39,6 +43,21 @@ you might actually take.
 Download from CurseForge, or clone this repository directly into
 `World of Warcraft/_retail_/Interface/AddOns/BonusRollGate`. The Ace3 libraries
 are vendored in `Libs/`, so a clone works as-is with no build step.
+
+## Developing
+
+```
+make test      # run the test suite against a stubbed WoW client
+make lint      # luacheck
+make format    # stylua
+make check     # lint + formatting check
+make package   # build the CurseForge zip locally, uploading nothing
+```
+
+`tests/` stubs the parts of the WoW client the addon touches, so the filter's
+decision table can be driven and asserted outside the game. CI runs the suite on
+every push, and a weekly job checks the vendored Ace3 copy against upstream and
+opens a pull request when it drifts.
 
 ## Credits
 

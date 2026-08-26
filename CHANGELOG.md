@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.1.0
+
+### Options panel
+
+- Difficulties are colour-coded on the item-quality ladder, so the sidebar reads
+  as a difficulty ladder at a glance.
+- Each raid difficulty in the tree shows what it is doing: a boss count, or
+  "(all)" when the whole difficulty is hidden.
+- An "At a glance" panel on the General tab lists everything currently filtered
+  in one place.
+- Settings are grouped into boxed sections rather than separated by bare rules,
+  and the per-boss list greys out when the whole difficulty is already hidden.
+- Added "Clear every filter", behind a confirmation.
+
+### Commands
+
+- `/brg` now opens the options panel as well as listing the commands.
+- Added `/brg hide` to dismiss the prompt on screen without changing settings.
+- Added `/brg toggle` to turn filtering on and off.
+- Added `/brg status` to print the current filters to chat.
+
+### Under the hood
+
+- Added a test suite: `tests/` stubs the WoW client so the filter can be driven
+  and asserted outside the game. 56 assertions covering the decision table,
+  the `/brg show` guards, the post-loading-screen re-prompt, and the options
+  tree.
+- Added CI: luacheck, stylua and the test suite on every push, plus a packaging
+  dry run so a broken TOC or .pkgmeta is caught before a release is tagged.
+- Added a weekly job that checks the vendored Ace3 copy against the WoWAce SVN
+  and opens a pull request when it drifts. Stale vendored libraries are what
+  made this addon's predecessor unusable.
+
 ## 1.0.0
 
 First release under the BonusRollGate name, for World of Warcraft: Midnight 12.1

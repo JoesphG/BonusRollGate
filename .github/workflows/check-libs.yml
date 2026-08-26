@@ -1,0 +1,102 @@
+name: Check Library Updates
+
+# The vendored Ace3 copy going stale is the exact failure that made this
+# addon's predecessor unusable: it shipped AceConfigDialog 78 while upstream
+# was at 92, and nothing was watching. This watches.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Mondays, 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-libs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install SVN
+        run: sudo apt-get update && sudo apt-get install -y subversion
+
+      - name: Fetch upstream libraries
+        run: |
+          set -euo pipefail
+          ACE="https://repos.wowace.com/wow/ace3/trunk"
+          MODULES="AceAddon-3.0 AceConfig-3.0 AceConsole-3.0 AceDB-3.0 AceDBOptions-3.0 AceEvent-3.0 AceGUI-3.0 AceHook-3.0"
+
+          # --ignore-keywords matters: without it svn expands $Id$ into a
+          # revision stamp and every file reads as changed on every run.
+          mkdir -p /tmp/upstream/LibStub
+          svn export -q --force --ignore-keywords \
+            https://repos.wowace.com/wow/libstub/trunk/LibStub.lua /tmp/upstream/LibStub/LibStub.lua
+          svn export -q --force --ignore-keywords \
+            https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0 /tmp/upstream/CallbackHandler-1.0
+          for m in $MODULES; do
+            svn export -q --force --ignore-keywords "$ACE/$m" "/tmp/upstream/$m"
+          done
+
+          # Upstream carries an empty, commented-out AceConfigDropdown-3.0
+          # folder; drop empty dirs and packaging metadata we never vendor.
+          find /tmp/upstream -type d -empty -delete
+          find /tmp/upstream \( -name '.pkgmeta' -o -name '*.toc' \) -delete
+          rm -rf /tmp/upstream/*/tests
+
+      - name: Compare against vendored copies
+        id: diff
+        run: |
+          set -uo pipefail
+          updated=""
+          for lib in /tmp/upstream/*/; do
+            name=$(basename "$lib")
+            if [ ! -d "Libs/$name" ]; then
+              echo "Libs/$name is not vendored; skipping"
+              continue
+            fi
+            if ! diff -rq "Libs/$name" "$lib" > /dev/null 2>&1; then
+              echo "updated: $name"
+              rm -rf "Libs/$name"
+              cp -r "$lib" "Libs/$name"
+              updated="$updated $name"
+            fi
+          done
+
+          if [ -n "$updated" ]; then
+            {
+              echo "changed=true"
+              echo "libs=$(echo $updated | xargs)"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "All vendored libraries are current."
+          fi
+
+      - name: Verify the addon still loads and passes its tests
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          sudo apt-get install -y lua5.1
+          luac5.1 -p Core.lua
+          lua5.1 tests/run.lua
+
+      - name: Open a pull request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/update-libs
+          delete-branch: true
+          commit-message: "chore: update vendored libraries (${{ steps.diff.outputs.libs }})"
+          title: "chore: update vendored libraries"
+          body: |
+            Upstream changed for:
+
+            `${{ steps.diff.outputs.libs }}`
+
+            Fetched from the WoWAce SVN with `--ignore-keywords`, so this diff is
+            real content rather than `$Id$` revision stamps.
+
+            The addon was syntax-checked and the test suite run against the
+            updated libraries before this PR was opened.

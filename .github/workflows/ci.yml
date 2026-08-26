@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lua:
+    name: Lint, format and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Lua and luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install luacheck
+
+      - name: Lint
+        run: luacheck .
+
+      - name: Check formatting
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check .
+
+      - name: Test
+        run: lua5.1 tests/run.lua
+
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Builds the zip exactly as a release would, but uploads nothing. Catches
+      # a broken .pkgmeta or TOC here rather than at tag time.
+      - name: Packager dry run
+        uses: BigWigsMods/packager@v2.5.1
+        with:
+          args: -d -z
+
+      - name: Confirm the addon files are present
+        run: |
+          set -e
+          pkg=".release/BonusRollGate"
+          for f in BonusRollGate.toc Core.lua embeds.xml icon.tga Libs/AceAddon-3.0/AceAddon-3.0.lua; do
+            test -f "$pkg/$f" || { echo "::error::missing $f in package"; exit 1; }
+          done
+          for f in .pkgmeta README.md images tests .github; do
+            test ! -e "$pkg/$f" || { echo "::error::$f should not be packaged"; exit 1; }
+          done
+          echo "Package contents OK"

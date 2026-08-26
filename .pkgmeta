@@ -6,10 +6,17 @@ manual-changelog: CHANGELOG.md
 
 # Libraries are vendored in Libs/ rather than pulled as externals, so a clone of
 # this repo can be dropped straight into Interface/AddOns and just work.
+# .github/workflows/check-libs.yml watches them for upstream updates.
 
 ignore:
   - .github
-  - images
   - .gitignore
+  - .luacheckrc
+  - .luarc.json
   - .pkgmeta
+  - .styluaignore
+  - Makefile
   - README.md
+  - images
+  - stylua.toml
+  - tests
