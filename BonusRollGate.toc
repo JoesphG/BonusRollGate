@@ -6,7 +6,7 @@
 ## SavedVariables: BRG_Data
 ## Category-enUS: Loot
 ## AllowLoadGameType: mainline
-## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## IconTexture: Interface\AddOns\BonusRollGate\icon.tga
 ## X-License: MIT
 ## X-Credits: Descended from BonusRollFilter by Chawan (public domain)
 ## X-Website: https://github.com/JoesphG/BonusRollGate
