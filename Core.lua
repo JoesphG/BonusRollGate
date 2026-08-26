@@ -8,8 +8,7 @@
 
 local ADDON_NAME = ...
 
-local BonusRollGate = LibStub("AceAddon-3.0"):NewAddon("BonusRollGate",
-    "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0")
+local BonusRollGate = LibStub("AceAddon-3.0"):NewAddon("BonusRollGate", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0")
 
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 
@@ -17,32 +16,40 @@ local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetad
 -- only a fallback in case it ever moves.
 local D = DifficultyUtil and DifficultyUtil.ID or {}
 local DIFF = {
-    RAID_LFR       = D.PrimaryRaidLFR or 17,
-    RAID_NORMAL    = D.PrimaryRaidNormal or 14,
-    RAID_HEROIC    = D.PrimaryRaidHeroic or 15,
-    RAID_MYTHIC    = D.PrimaryRaidMythic or 16,
-    RAID_STORY     = D.RaidStory or 220,
-    RAID_FLEX      = D.RaidMythicFlexible or 233,
-    RAID_WORLD     = D.RaidWorld or 250,
+    RAID_LFR = D.PrimaryRaidLFR or 17,
+    RAID_NORMAL = D.PrimaryRaidNormal or 14,
+    RAID_HEROIC = D.PrimaryRaidHeroic or 15,
+    RAID_MYTHIC = D.PrimaryRaidMythic or 16,
+    RAID_STORY = D.RaidStory or 220,
+    RAID_FLEX = D.RaidMythicFlexible or 233,
+    RAID_WORLD = D.RaidWorld or 250,
     DUNGEON_NORMAL = D.DungeonNormal or 1,
     DUNGEON_HEROIC = D.DungeonHeroic or 2,
     DUNGEON_MYTHIC = D.DungeonMythic or 23,
-    MYTHIC_PLUS    = D.DungeonChallenge or 8,
-    DELVE          = 208,
-    WORLD_BOSS     = 172,
+    MYTHIC_PLUS = D.DungeonChallenge or 8,
+    DELVE = 208,
+    WORLD_BOSS = 172,
 }
 
 local RAID_DIFFICULTIES = {
-    DIFF.RAID_LFR, DIFF.RAID_NORMAL, DIFF.RAID_HEROIC, DIFF.RAID_MYTHIC,
-    DIFF.RAID_FLEX, DIFF.RAID_STORY, DIFF.RAID_WORLD,
+    DIFF.RAID_LFR,
+    DIFF.RAID_NORMAL,
+    DIFF.RAID_HEROIC,
+    DIFF.RAID_MYTHIC,
+    DIFF.RAID_FLEX,
+    DIFF.RAID_STORY,
+    DIFF.RAID_WORLD,
 }
 
 local DUNGEON_DIFFICULTIES = {
-    DIFF.DUNGEON_NORMAL, DIFF.DUNGEON_HEROIC, DIFF.DUNGEON_MYTHIC,
+    DIFF.DUNGEON_NORMAL,
+    DIFF.DUNGEON_HEROIC,
+    DIFF.DUNGEON_MYTHIC,
 }
 
 local OTHER_DIFFICULTIES = {
-    DIFF.DELVE, DIFF.WORLD_BOSS,
+    DIFF.DELVE,
+    DIFF.WORLD_BOSS,
 }
 
 -- Every difficulty that gets its own dedicated control somewhere in the
@@ -121,15 +128,18 @@ local function BuildEncounterList()
         local i = 1
         while true do
             local instanceID, instanceName = EJ_GetInstanceByIndex(i, true)
-            if not instanceID then break end
+            if not instanceID then
+                break
+            end
 
             local j = 1
             while true do
                 local encounterName, _, encounterID = EJ_GetEncounterInfoByIndex(j, instanceID)
-                if not encounterID then break end
+                if not encounterID then
+                    break
+                end
                 if encounterName and not list[encounterID] then
-                    list[encounterID] = instanceName
-                        and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
+                    list[encounterID] = instanceName and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
                         or encounterName
                 end
                 j = j + 1
@@ -170,7 +180,9 @@ end
 
 function BonusRollGate:GetKeystoneLevel()
     local cm = C_ChallengeMode
-    if not cm then return nil end
+    if not cm then
+        return nil
+    end
 
     if cm.GetChallengeCompletionInfo then
         local info = cm.GetChallengeCompletionInfo()
@@ -195,11 +207,9 @@ function BonusRollGate:Learn(info)
         self.db.global.seenDifficulties[info.difficultyID] = true
     end
 
-    if info.encounterID and info.encounterID ~= 0
-        and not self.db.global.seenEncounters[info.encounterID] then
+    if info.encounterID and info.encounterID ~= 0 and not self.db.global.seenEncounters[info.encounterID] then
         local name = EJ_GetEncounterInfo and EJ_GetEncounterInfo(info.encounterID)
-        self.db.global.seenEncounters[info.encounterID] =
-            name or ("Encounter %d"):format(info.encounterID)
+        self.db.global.seenEncounters[info.encounterID] = name or ("Encounter %d"):format(info.encounterID)
     end
 end
 
@@ -207,81 +217,257 @@ end
 -- Options
 --------------------------------------------------------------------------------
 
+-- The item-quality ramp, which players already read as a difficulty ladder.
+local DIFFICULTY_COLOR = {
+    [DIFF.RAID_LFR] = "ff9d9d9d",
+    [DIFF.RAID_NORMAL] = "ffffffff",
+    [DIFF.RAID_HEROIC] = "ff0070dd",
+    [DIFF.RAID_MYTHIC] = "ffa335ee",
+    [DIFF.RAID_FLEX] = "ffa335ee",
+    [DIFF.RAID_STORY] = "ff1eff00",
+    [DIFF.RAID_WORLD] = "ffff8000",
+    [DIFF.DUNGEON_NORMAL] = "ffffffff",
+    [DIFF.DUNGEON_HEROIC] = "ff0070dd",
+    [DIFF.DUNGEON_MYTHIC] = "ffa335ee",
+    [DIFF.MYTHIC_PLUS] = "ffff8000",
+    [DIFF.DELVE] = "ff1eff00",
+    [DIFF.WORLD_BOSS] = "ffff8000",
+}
+
+local GREY, GOLD, GREEN, RED = "ff808080", "ffffd100", "ff40dd60", "ffff6060"
+
+local function colored(text, hex)
+    return ("|c%s%s|r"):format(hex, text)
+end
+
+local function ColoredDifficulty(difficultyID)
+    return colored(DifficultyName(difficultyID), DIFFICULTY_COLOR[difficultyID] or "ffffffff")
+end
+
+-- Count of bosses explicitly hidden at a difficulty, for the tree labels.
+function BonusRollGate:HiddenCount(difficultyID)
+    local n = 0
+    for _, hidden in pairs(self.db.profile.difficulty[difficultyID].encounters) do
+        if hidden == true then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+-- Tree label: coloured difficulty name plus what it is currently doing, so the
+-- sidebar alone tells you where your filters live.
+function BonusRollGate:DifficultyLabel(difficultyID)
+    local cfg = self.db.profile.difficulty[difficultyID]
+    local label = ColoredDifficulty(difficultyID)
+    if cfg.hide then
+        return label .. " " .. colored("(all)", RED)
+    end
+    local n = self:HiddenCount(difficultyID)
+    if n > 0 then
+        return label .. " " .. colored("(" .. n .. ")", GOLD)
+    end
+    return label
+end
+
+--- One-line summary of everything currently being filtered.
+function BonusRollGate:StatusText()
+    if not self.db.profile.enabled then
+        return colored("Filtering is off.", RED) .. " Nothing is being hidden."
+    end
+
+    local lines, total = {}, 0
+    local all = {}
+    for _, id in ipairs(RAID_DIFFICULTIES) do
+        all[#all + 1] = id
+    end
+    for _, id in ipairs(DUNGEON_DIFFICULTIES) do
+        all[#all + 1] = id
+    end
+    for _, id in ipairs(OTHER_DIFFICULTIES) do
+        all[#all + 1] = id
+    end
+
+    for _, id in ipairs(all) do
+        local cfg = self.db.profile.difficulty[id]
+        if cfg.hide then
+            lines[#lines + 1] = ColoredDifficulty(id) .. colored(" - every roll", GREY)
+            total = total + 1
+        else
+            local n = self:HiddenCount(id)
+            if n > 0 then
+                local suffix = (" - %d boss%s"):format(n, n == 1 and "" or "es")
+                lines[#lines + 1] = ColoredDifficulty(id) .. colored(suffix, GREY)
+                total = total + 1
+            end
+        end
+    end
+
+    local mp = self.db.profile.mythicPlus
+    if mp.hideAll then
+        lines[#lines + 1] = colored("Mythic+", DIFFICULTY_COLOR[DIFF.MYTHIC_PLUS]) .. colored(" - every roll", GREY)
+        total = total + 1
+    elseif mp.useMinLevel then
+        lines[#lines + 1] = colored("Mythic+", DIFFICULTY_COLOR[DIFF.MYTHIC_PLUS])
+            .. colored((" - below +%d"):format(mp.minLevel), GREY)
+        total = total + 1
+    end
+
+    if total == 0 then
+        return colored("Nothing is filtered yet.", GREEN)
+            .. " Every bonus roll will show. Pick bosses on the Raids tab,"
+            .. " or use the switches under Dungeons and Other content."
+    end
+
+    return colored("Currently hiding:", GOLD) .. "\n" .. table.concat(lines, "\n")
+end
+
+function BonusRollGate:ClearAllFilters()
+    for _, cfg in pairs(self.db.profile.difficulty) do
+        cfg.hide = false
+        for id in pairs(cfg.encounters) do
+            cfg.encounters[id] = false
+        end
+    end
+    self.db.profile.mythicPlus.hideAll = false
+    self.db.profile.mythicPlus.useMinLevel = false
+end
+
 local function RaidDifficultyGroup(self, difficultyID, order)
     local function cfg()
         return self.db.profile.difficulty[difficultyID]
     end
 
     return {
-        name = DifficultyName(difficultyID),
+        name = function()
+            return self:DifficultyLabel(difficultyID)
+        end,
         type = "group",
         order = order,
         args = {
-            hide = {
-                name = "Hide every bonus roll at this difficulty",
-                desc = "Ignores the per-boss list below and hides all of them.",
-                type = "toggle",
-                width = "full",
+            intro = {
+                name = function()
+                    return ("Bonus rolls at %s difficulty.\n"):format(ColoredDifficulty(difficultyID))
+                end,
+                type = "description",
+                fontSize = "medium",
                 order = 1,
-                set = function(_, val) cfg().hide = val end,
-                get = function() return cfg().hide end,
             },
-            bossHeader = {
-                name = "Per boss",
-                type = "header",
+            sweeping = {
+                name = " ",
+                type = "group",
+                inline = true,
                 order = 2,
+                args = {
+                    hide = {
+                        name = "Hide every bonus roll at this difficulty",
+                        desc = "Overrides the per-boss list below.",
+                        type = "toggle",
+                        width = "full",
+                        order = 1,
+                        set = function(_, val)
+                            cfg().hide = val
+                        end,
+                        get = function()
+                            return cfg().hide
+                        end,
+                    },
+                },
             },
-            hideAllBosses = {
-                name = "Check all",
-                desc = "Hide bonus rolls for every boss listed below.",
-                type = "execute",
+            perBoss = {
+                name = "Per boss",
+                type = "group",
+                inline = true,
                 order = 3,
-                func = function()
-                    local encounters = cfg().encounters
-                    for id in pairs(self:GetEncounterChoices()) do
-                        encounters[id] = true
-                    end
+                disabled = function()
+                    return cfg().hide
                 end,
-            },
-            showAllBosses = {
-                name = "Clear all",
-                desc = "Show bonus rolls for every boss listed below.",
-                type = "execute",
-                order = 4,
-                func = function()
-                    local encounters = cfg().encounters
-                    for id in pairs(self:GetEncounterChoices()) do
-                        encounters[id] = false
-                    end
-                end,
-            },
-            bosses = {
-                name = "Bosses to hide bonus rolls on",
-                type = "multiselect",
-                order = 5,
-                values = function() return self:GetEncounterChoices() end,
-                set = function(_, key, val) cfg().encounters[key] = val end,
-                get = function(_, key) return cfg().encounters[key] end,
+                args = {
+                    blurb = {
+                        name = function()
+                            local n = self:HiddenCount(difficultyID)
+                            if cfg().hide then
+                                return colored(
+                                    "Every roll at this difficulty is hidden, so the list below is inactive.",
+                                    GREY
+                                )
+                            elseif n == 0 then
+                                return colored("Tick a boss to stop its bonus roll appearing.", GREY)
+                            end
+                            return colored(("%d boss%s hidden."):format(n, n == 1 and "" or "es"), GOLD)
+                        end,
+                        type = "description",
+                        order = 1,
+                    },
+                    hideAllBosses = {
+                        name = "Check all",
+                        desc = "Hide bonus rolls for every boss listed.",
+                        type = "execute",
+                        order = 2,
+                        func = function()
+                            local encounters = cfg().encounters
+                            for id in pairs(self:GetEncounterChoices()) do
+                                encounters[id] = true
+                            end
+                        end,
+                    },
+                    showAllBosses = {
+                        name = "Clear all",
+                        desc = "Show bonus rolls for every boss listed.",
+                        type = "execute",
+                        order = 3,
+                        func = function()
+                            local encounters = cfg().encounters
+                            for id in pairs(self:GetEncounterChoices()) do
+                                encounters[id] = false
+                            end
+                        end,
+                    },
+                    bosses = {
+                        name = "",
+                        type = "multiselect",
+                        order = 4,
+                        values = function()
+                            return self:GetEncounterChoices()
+                        end,
+                        set = function(_, key, val)
+                            cfg().encounters[key] = val
+                        end,
+                        get = function(_, key)
+                            return cfg().encounters[key]
+                        end,
+                    },
+                },
             },
         },
     }
 end
 
-local function DifficultyToggle(self, difficultyID, order, nameOverride)
+local function DifficultyToggle(self, difficultyID, order)
     return {
-        name = nameOverride or DifficultyName(difficultyID),
-        desc = ("Hide bonus rolls offered at difficulty %d."):format(difficultyID),
+        name = function()
+            return ColoredDifficulty(difficultyID)
+        end,
+        desc = function()
+            return ("Hide bonus rolls offered at %s."):format(DifficultyName(difficultyID))
+        end,
         type = "toggle",
         width = "full",
         order = order,
-        set = function(_, val) self.db.profile.difficulty[difficultyID].hide = val end,
-        get = function() return self.db.profile.difficulty[difficultyID].hide end,
+        set = function(_, val)
+            self.db.profile.difficulty[difficultyID].hide = val
+        end,
+        get = function()
+            return self.db.profile.difficulty[difficultyID].hide
+        end,
     }
 end
 
 function BonusRollGate:BuildOptions()
     local options = {
-        name = "BonusRollGate",
+        name = function()
+            return "BonusRollGate  " .. colored("v" .. (GetAddOnMetadata(ADDON_NAME, "Version") or "?"), GREY)
+        end,
         type = "group",
         childGroups = "tab",
         args = {
@@ -290,37 +476,113 @@ function BonusRollGate:BuildOptions()
                 type = "group",
                 order = 1,
                 args = {
-                    enabled = {
-                        name = "Enable filtering",
-                        desc = "Turn the whole addon off without losing your settings.",
-                        type = "toggle",
-                        width = "full",
+                    banner = {
+                        name = colored("Spend your Voidcores where you meant to.", GOLD)
+                            .. "\nBonus rolls you have decided against never appear,"
+                            .. " so the only prompts you see are ones worth reading.\n",
+                        type = "description",
+                        fontSize = "medium",
+                        image = "Interface\\AddOns\\BonusRollGate\\icon",
+                        imageWidth = 48,
+                        imageHeight = 48,
                         order = 1,
-                        set = function(_, val) self.db.profile.enabled = val end,
-                        get = function() return self.db.profile.enabled end,
                     },
-                    announce = {
-                        name = "Announce hidden rolls in chat",
-                        desc = "Print a reminder that /brg show will bring the roll back.",
-                        type = "toggle",
-                        width = "full",
+                    switches = {
+                        name = "Behaviour",
+                        type = "group",
+                        inline = true,
                         order = 2,
-                        set = function(_, val) self.db.profile.announce = val end,
-                        get = function() return self.db.profile.announce end,
+                        args = {
+                            enabled = {
+                                name = "Enable filtering",
+                                desc = "Turn the addon off without losing your settings.",
+                                type = "toggle",
+                                width = "full",
+                                order = 1,
+                                set = function(_, val)
+                                    self.db.profile.enabled = val
+                                end,
+                                get = function()
+                                    return self.db.profile.enabled
+                                end,
+                            },
+                            announce = {
+                                name = "Announce hidden rolls in chat",
+                                desc = "Print a reminder that /brg show will bring the roll back.",
+                                type = "toggle",
+                                width = "full",
+                                order = 2,
+                                disabled = function()
+                                    return not self.db.profile.enabled
+                                end,
+                                set = function(_, val)
+                                    self.db.profile.announce = val
+                                end,
+                                get = function()
+                                    return self.db.profile.announce
+                                end,
+                            },
+                        },
                     },
-                    spacer = { name = "", type = "description", order = 3 },
-                    show = {
-                        name = "Show the current bonus roll",
-                        desc = "Same as typing /brg show.",
-                        type = "execute",
+                    status = {
+                        name = "At a glance",
+                        type = "group",
+                        inline = true,
+                        order = 3,
+                        args = {
+                            text = {
+                                name = function()
+                                    return self:StatusText()
+                                end,
+                                type = "description",
+                                fontSize = "medium",
+                                order = 1,
+                            },
+                        },
+                    },
+                    actions = {
+                        name = "Actions",
+                        type = "group",
+                        inline = true,
                         order = 4,
-                        func = function() self:ShowRoll() end,
+                        args = {
+                            show = {
+                                name = "Show the current bonus roll",
+                                desc = "Same as typing /brg show. Brings back a roll that was hidden,"
+                                    .. " as long as its timer is still running.",
+                                type = "execute",
+                                order = 1,
+                                func = function()
+                                    self:ShowRoll()
+                                end,
+                            },
+                            clear = {
+                                name = "Clear every filter",
+                                desc = "Unhide everything, on every difficulty. Your profile is kept.",
+                                type = "execute",
+                                confirm = true,
+                                confirmText = "Clear every filter on every difficulty?",
+                                order = 2,
+                                func = function()
+                                    self:ClearAllFilters()
+                                end,
+                            },
+                        },
                     },
                     help = {
-                        name = "\n|cffffd100Bonus rolls in Midnight|r\n"
-                            .. "Raid bosses, Mythic+ dungeons, Bountiful Delves and Nightmare "
-                            .. "Prey each offer a roll. Raid bosses are filtered individually "
-                            .. "on the Raids tab; everything else is filtered by content type.",
+                        name = colored("\nWhere rolls come from in Midnight\n", GOLD)
+                            .. "Raid bosses, Mythic+ dungeons, Bountiful Delves and Nightmare Prey each offer a roll. "
+                            .. "Raid bosses are filtered individually on the "
+                            .. colored("Raids", GOLD)
+                            .. " tab; everything else is filtered by content type under "
+                            .. colored("Dungeons", GOLD)
+                            .. " and "
+                            .. colored("Other content", GOLD)
+                            .. ".\n\n"
+                            .. colored("/brg show", GOLD)
+                            .. "  bring back a hidden roll\n"
+                            .. colored("/brg config", GOLD)
+                            .. "  open this panel",
                         type = "description",
                         order = 5,
                     },
@@ -338,50 +600,83 @@ function BonusRollGate:BuildOptions()
                 type = "group",
                 order = 3,
                 args = {
-                    mythicPlusHeader = {
-                        name = "Mythic+",
-                        type = "header",
+                    mythicPlus = {
+                        name = colored("Mythic+", DIFFICULTY_COLOR[DIFF.MYTHIC_PLUS]),
+                        type = "group",
+                        inline = true,
                         order = 1,
+                        args = {
+                            hideAllMythicPlus = {
+                                name = "Hide bonus rolls in all Mythic+ dungeons",
+                                type = "toggle",
+                                width = "full",
+                                order = 1,
+                                set = function(_, val)
+                                    self.db.profile.mythicPlus.hideAll = val
+                                    if val then
+                                        self.db.profile.mythicPlus.useMinLevel = false
+                                    end
+                                end,
+                                get = function()
+                                    return self.db.profile.mythicPlus.hideAll
+                                end,
+                            },
+                            useMinLevel = {
+                                name = "Only hide below a keystone level",
+                                type = "toggle",
+                                width = "full",
+                                order = 2,
+                                disabled = function()
+                                    return self.db.profile.mythicPlus.hideAll
+                                end,
+                                set = function(_, val)
+                                    self.db.profile.mythicPlus.useMinLevel = val
+                                end,
+                                get = function()
+                                    return self.db.profile.mythicPlus.useMinLevel
+                                end,
+                            },
+                            minLevel = {
+                                name = "Minimum keystone level",
+                                desc = "Rolls are hidden when the key you finished was below this level.",
+                                type = "range",
+                                min = 2,
+                                max = 40,
+                                step = 1,
+                                width = "full",
+                                order = 3,
+                                disabled = function()
+                                    local mp = self.db.profile.mythicPlus
+                                    return mp.hideAll or not mp.useMinLevel
+                                end,
+                                set = function(_, val)
+                                    self.db.profile.mythicPlus.minLevel = val
+                                end,
+                                get = function()
+                                    return self.db.profile.mythicPlus.minLevel
+                                end,
+                            },
+                            summary = {
+                                name = function()
+                                    local mp = self.db.profile.mythicPlus
+                                    if mp.hideAll then
+                                        return colored("Every Mythic+ bonus roll is hidden.", RED)
+                                    elseif mp.useMinLevel then
+                                        return colored(("Rolls below +%d are hidden."):format(mp.minLevel), GOLD)
+                                    end
+                                    return colored("Every Mythic+ bonus roll will show.", GREEN)
+                                end,
+                                type = "description",
+                                order = 4,
+                            },
+                        },
                     },
-                    hideAllMythicPlus = {
-                        name = "Hide bonus rolls in all Mythic+ dungeons",
-                        type = "toggle",
-                        width = "full",
-                        order = 2,
-                        set = function(_, val)
-                            self.db.profile.mythicPlus.hideAll = val
-                            if val then
-                                self.db.profile.mythicPlus.useMinLevel = false
-                            end
-                        end,
-                        get = function() return self.db.profile.mythicPlus.hideAll end,
-                    },
-                    useMinLevel = {
-                        name = "Hide below a keystone level",
-                        type = "toggle",
-                        width = "full",
-                        order = 3,
-                        disabled = function() return self.db.profile.mythicPlus.hideAll end,
-                        set = function(_, val) self.db.profile.mythicPlus.useMinLevel = val end,
-                        get = function() return self.db.profile.mythicPlus.useMinLevel end,
-                    },
-                    minLevel = {
-                        name = "Minimum keystone level",
-                        desc = "Rolls are hidden when the completed key was below this level.",
-                        type = "range",
-                        min = 2, max = 40, step = 1,
-                        order = 4,
-                        disabled = function()
-                            local mp = self.db.profile.mythicPlus
-                            return mp.hideAll or not mp.useMinLevel
-                        end,
-                        set = function(_, val) self.db.profile.mythicPlus.minLevel = val end,
-                        get = function() return self.db.profile.mythicPlus.minLevel end,
-                    },
-                    otherHeader = {
+                    others = {
                         name = "Other dungeon difficulties",
-                        type = "header",
-                        order = 10,
+                        type = "group",
+                        inline = true,
+                        order = 2,
+                        args = {},
                     },
                 },
             },
@@ -390,10 +685,12 @@ function BonusRollGate:BuildOptions()
                 type = "group",
                 order = 4,
                 args = {
-                    header = {
+                    known = {
                         name = "Hide bonus rolls from",
-                        type = "header",
+                        type = "group",
+                        inline = true,
                         order = 1,
+                        args = {},
                     },
                 },
             },
@@ -401,28 +698,42 @@ function BonusRollGate:BuildOptions()
     }
 
     for i, difficultyID in ipairs(RAID_DIFFICULTIES) do
-        options.args.raids.args["diff" .. difficultyID] =
-            RaidDifficultyGroup(self, difficultyID, i)
+        options.args.raids.args["diff" .. difficultyID] = RaidDifficultyGroup(self, difficultyID, i)
     end
 
     for i, difficultyID in ipairs(DUNGEON_DIFFICULTIES) do
-        options.args.dungeons.args["diff" .. difficultyID] =
-            DifficultyToggle(self, difficultyID, 10 + i)
+        options.args.dungeons.args.others.args["diff" .. difficultyID] = DifficultyToggle(self, difficultyID, i)
     end
 
     for i, difficultyID in ipairs(OTHER_DIFFICULTIES) do
-        options.args.other.args["diff" .. difficultyID] =
-            DifficultyToggle(self, difficultyID, 10 + i)
+        options.args.other.args.known.args["diff" .. difficultyID] = DifficultyToggle(self, difficultyID, i)
     end
 
     -- Anything the addon has run into that has no dedicated control above.
-    local extraOrder = 100
+    local extra, extraOrder = {}, 100
     for difficultyID in pairs(self.db.global.seenDifficulties) do
         if not KNOWN_DIFFICULTIES[difficultyID] then
-            options.args.other.args["diff" .. difficultyID] =
-                DifficultyToggle(self, difficultyID, extraOrder)
+            extra["diff" .. difficultyID] = DifficultyToggle(self, difficultyID, extraOrder)
             extraOrder = extraOrder + 1
         end
+    end
+
+    if next(extra) then
+        extra.blurb = {
+            name = colored(
+                "Difficulties BonusRollGate has been offered a roll on that it did not ship a switch for.",
+                GREY
+            ),
+            type = "description",
+            order = 1,
+        }
+        options.args.other.args.learned = {
+            name = "Seen in play",
+            type = "group",
+            inline = true,
+            order = 2,
+            args = extra,
+        }
     end
 
     return options
@@ -442,8 +753,7 @@ function BonusRollGate:OnInitialize()
     registry:RegisterOptionsTable("BonusRollGate", function()
         return self:BuildOptions()
     end)
-    registry:RegisterOptionsTable("BonusRollGate_Profiles",
-        LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
+    registry:RegisterOptionsTable("BonusRollGate_Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
 
     local _, categoryID = dialog:AddToBlizOptions("BonusRollGate", "BonusRollGate")
     self.optionsCategory = categoryID
@@ -483,9 +793,15 @@ function BonusRollGate:CaptureRollInfo(frame)
 
     local cached = spellID and self.rollCache[spellID]
     if cached then
-        if not difficultyID or difficultyID == 0 then difficultyID = cached.difficultyID end
-        if not encounterID or encounterID == 0 then encounterID = cached.encounterID end
-        if not instanceID or instanceID == 0 then instanceID = cached.instanceID end
+        if not difficultyID or difficultyID == 0 then
+            difficultyID = cached.difficultyID
+        end
+        if not encounterID or encounterID == 0 then
+            encounterID = cached.encounterID
+        end
+        if not instanceID or instanceID == 0 then
+            instanceID = cached.instanceID
+        end
     end
 
     local info = {
@@ -561,11 +877,28 @@ function BonusRollGate:HideRoll()
     end
 end
 
+--- /brg hide: dismiss whatever prompt is on screen, without touching settings.
+function BonusRollGate:HideCurrentRoll()
+    local frame = BonusRollFrame
+
+    if not frame or not frame:IsShown() then
+        self:Print("There is no bonus roll on screen to hide.")
+        return
+    end
+
+    if frame.state ~= "prompt" then
+        self:Print("That roll is already under way and cannot be hidden now.")
+        return
+    end
+
+    GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+    self:Print('Bonus roll hidden, type "/brg show" to open it again.')
+end
+
 function BonusRollGate:ShowRoll()
     local frame = BonusRollFrame
 
-    if not frame or frame.state ~= "prompt" or self.userAction
-        or not frame.endTime or time() > frame.endTime then
+    if not frame or frame.state ~= "prompt" or self.userAction or not frame.endTime or time() > frame.endTime then
         self:Print("No active bonus roll to show.")
         return
     end
@@ -583,20 +916,62 @@ end
 -- Slash command
 --------------------------------------------------------------------------------
 
-function BonusRollGate:SlashCommand(command)
-    command = (command or ""):lower():match("^%s*(.-)%s*$")
+local function cmd(text)
+    return "|cffffd100" .. text .. "|r"
+end
 
-    if command == "show" then
-        self:ShowRoll()
-    elseif command == "config" or command == "options" then
-        if self.optionsCategory then
-            Settings.OpenToCategory(self.optionsCategory)
-        else
-            self:Print("Options are not available yet.")
+function BonusRollGate:PrintCommands()
+    self:Print("Commands:")
+    self:Print("  " .. cmd("/brg") .. "         open this list and the options panel")
+    self:Print("  " .. cmd("/brg config") .. "  open the options panel")
+    self:Print("  " .. cmd("/brg show") .. "    bring back a roll that was hidden")
+    self:Print("  " .. cmd("/brg hide") .. "    hide the bonus roll showing right now")
+    self:Print("  " .. cmd("/brg toggle") .. "  turn filtering on or off")
+    self:Print("  " .. cmd("/brg status") .. "  list what is currently filtered")
+    self:Print("  " .. cmd("/bonusrollgate") .. " works anywhere /brg does")
+end
+
+function BonusRollGate:OpenOptions()
+    if not self.optionsCategory then
+        self:Print("Options are not available yet.")
+        return false
+    end
+    Settings.OpenToCategory(self.optionsCategory)
+    return true
+end
+
+function BonusRollGate:PrintStatus()
+    -- StatusText is written for the options panel, where a leading colour code
+    -- and embedded newlines are fine; chat needs it line by line.
+    for line in (self:StatusText() .. "\n"):gmatch("(.-)\n") do
+        if line ~= "" then
+            self:Print(line)
         end
+    end
+end
+
+function BonusRollGate:SlashCommand(input)
+    local command = (input or ""):lower():match("^%s*(.-)%s*$")
+
+    if command == "" then
+        self:Print("Version " .. (GetAddOnMetadata(ADDON_NAME, "Version") or "unknown"))
+        self:PrintCommands()
+        self:OpenOptions()
+    elseif command == "config" or command == "options" or command == "opt" then
+        self:OpenOptions()
+    elseif command == "show" then
+        self:ShowRoll()
+    elseif command == "hide" then
+        self:HideCurrentRoll()
+    elseif command == "toggle" then
+        self.db.profile.enabled = not self.db.profile.enabled
+        self:Print(self.db.profile.enabled and "Filtering enabled." or "Filtering disabled.")
+    elseif command == "status" then
+        self:PrintStatus()
+    elseif command == "help" or command == "?" then
+        self:PrintCommands()
     else
-        self:Print("Version: " .. (GetAddOnMetadata(ADDON_NAME, "Version") or "unknown"))
-        self:Print("/brg show - shows the bonus roll if it was hidden")
-        self:Print("/brg config - opens the configuration window")
+        self:Print(("Unknown command '%s'."):format(command))
+        self:PrintCommands()
     end
 end
