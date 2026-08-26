@@ -52,11 +52,10 @@ local OTHER_DIFFICULTIES = {
     DIFF.WORLD_BOSS,
 }
 
--- Bosses fought out in the open world rather than inside a raid instance. The
--- journal files them together under a pseudo-instance in its raid list, so the
--- addon has to sort them back out again.
+-- Difficulties whose bosses come from the journal's world boss pseudo-instance.
+-- World (250) is not one of them: it is a difficulty real raid instances offer
+-- alongside Normal, Heroic and Mythic, so it takes the instanced boss list.
 local WORLD_DIFFICULTIES = {
-    [DIFF.RAID_WORLD] = true,
     [DIFF.WORLD_BOSS] = true,
 }
 

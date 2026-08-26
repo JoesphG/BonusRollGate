@@ -16,10 +16,10 @@ you might actually take.
   "hide everything at this difficulty" switch.
 - **Boss lists build themselves.** Encounters come from the Encounter Journal at
   runtime instead of a hardcoded table, so a new raid tier needs no addon update.
-  The lists cover the current tier, which is where bonus rolls come from: the
-  instanced raid difficulties list instanced bosses and the world difficulties
-  list world bosses. Anything the addon is actually offered a roll on is
-  remembered and added to the options too, so nothing falls off the list.
+  The lists cover the current tier, which is where bonus rolls come from, and
+  the journal's world bosses are kept out of them. Anything the addon is actually
+  offered a roll on is remembered and added to the options too, so nothing falls
+  off the list.
 - **Mythic+ keystone threshold.** Hide rolls in all Mythic+ dungeons, or only
   below a keystone level you pick.
 - **Delves, dungeons and world bosses** each get their own switch.

@@ -11,8 +11,8 @@
   ([#1](https://github.com/JoesphG/BonusRollGate/issues/1), reported and
   diagnosed by @lostmimic)
 - World bosses no longer appear on the raid difficulty tabs. The journal files
-  an expansion's world bosses under a pseudo-instance in its raid list; those
-  bosses now go to the World Raid and World Boss lists instead.
+  an expansion's world bosses under a pseudo-instance in its raid list, and they
+  belong to the World Boss difficulty alone.
   ([#2](https://github.com/JoesphG/BonusRollGate/issues/2))
 
 ### Changed

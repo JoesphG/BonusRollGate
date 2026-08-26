@@ -196,7 +196,14 @@ end
 for _, id in ipairs(H.encounterIDs) do
     ok(worldBosses[id] == nil, "raid boss " .. id .. " is not listed under World Boss")
 end
-ok(A:GetEncounterChoices(D.WORLD_RAID)[H.worldEncounterIDs[1]] ~= nil, "World Raid uses the world boss list")
+-- World is a difficulty of real raid instances, not of the world boss container
+for _, id in ipairs(H.encounterIDs) do
+    ok(A:GetEncounterChoices(D.WORLD_RAID)[id] ~= nil, "World Raid lists instanced boss " .. id)
+end
+ok(
+    A:GetEncounterChoices(D.WORLD_RAID)[H.worldEncounterIDs[1]] == nil,
+    "World Raid does not list the world boss container"
+)
 
 -- a world boss we have actually rolled on must not leak back into the raid list
 reset()
