@@ -71,17 +71,62 @@ Settings = {
     end,
 }
 
--- Encounter Journal: newest tier holds one raid with three bosses.
+-- Encounter Journal. The newest tier holds one raid, plus the pseudo-instance
+-- the journal files world bosses under (no instance map, named after the
+-- expansion); the tier before it holds a raid of its own. As on the live
+-- client, EJ_GetEncounterInfoByIndex only answers for the selected instance.
 local EJ_TIER, NEWEST_TIER = 1, 3
-local ejRaid = {
-    id = 1300,
-    name = "Voidscar Bastion",
-    bosses = {
-        { "Warden Kaelis", 2900 },
-        { "The Hollow Choir", 2901 },
-        { "Nal'thelun", 2902 },
+local EJ_INSTANCE = nil
+
+local ejTiers = {
+    [3] = {
+        name = "Midnight",
+        instances = {
+            {
+                id = 1300,
+                name = "Voidscar Bastion",
+                areaMapID = 2500,
+                bosses = {
+                    { "Warden Kaelis", 2900 },
+                    { "The Hollow Choir", 2901 },
+                    { "Nal'thelun", 2902 },
+                },
+            },
+            {
+                id = 1301,
+                name = "Midnight",
+                areaMapID = 0,
+                bosses = {
+                    { "Dread Herald Vashj", 2950 },
+                },
+            },
+        },
+    },
+    [2] = {
+        name = "The War Within",
+        instances = {
+            {
+                id = 1200,
+                name = "Liberation of Undermine",
+                areaMapID = 2400,
+                bosses = {
+                    { "Vexie and the Geargrinders", 2800 },
+                },
+            },
+        },
     },
 }
+
+local function ejInstanceByID(id)
+    for _, tier in pairs(ejTiers) do
+        for _, inst in ipairs(tier.instances) do
+            if inst.id == id then
+                return inst
+            end
+        end
+    end
+end
+
 function EJ_GetNumTiers()
     return NEWEST_TIER
 end
@@ -91,32 +136,55 @@ end
 function EJ_SelectTier(t)
     EJ_TIER = t
 end
+function EJ_GetTierInfo(t)
+    return ejTiers[t] and ejTiers[t].name
+end
+function EJ_GetCurrentInstance()
+    return EJ_INSTANCE
+end
+function EJ_SelectInstance(id)
+    EJ_INSTANCE = id
+end
 function EJ_GetInstanceByIndex(i)
-    if EJ_TIER ~= NEWEST_TIER or i ~= 1 then
+    local tier = ejTiers[EJ_TIER]
+    local inst = tier and tier.instances[i]
+    if not inst then
         return nil
     end
-    return ejRaid.id, ejRaid.name
+    return inst.id, inst.name, "desc", nil, nil, nil, nil, inst.areaMapID
 end
 function EJ_GetEncounterInfoByIndex(j, instanceID)
-    if instanceID ~= ejRaid.id then
+    -- The bug from issue #1: without a matching EJ_SelectInstance this is nil.
+    if EJ_INSTANCE ~= instanceID then
         return nil
     end
-    local b = ejRaid.bosses[j]
+    local inst = ejInstanceByID(instanceID)
+    local b = inst and inst.bosses[j]
     if not b then
         return nil
     end
     return b[1], "desc", b[2]
 end
 function EJ_GetEncounterInfo(id)
-    for _, b in ipairs(ejRaid.bosses) do
-        if b[2] == id then
-            return b[1]
+    for _, tier in pairs(ejTiers) do
+        for _, inst in ipairs(tier.instances) do
+            for _, b in ipairs(inst.bosses) do
+                if b[2] == id then
+                    return b[1]
+                end
+            end
         end
     end
 end
+
 H.encounterIDs = { 2900, 2901, 2902 }
+H.worldEncounterIDs = { 2950 }
+H.previousTierEncounterIDs = { 2800 }
 H.tierWhenLoaded = function()
     return EJ_TIER
+end
+H.selectedInstance = function()
+    return EJ_INSTANCE
 end
 
 -- Loot container + bonus roll frame

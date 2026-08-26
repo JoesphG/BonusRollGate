@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.1.1
+
+### Fixed
+
+- The per-boss lists came up empty. `EJ_GetEncounterInfoByIndex` takes an
+  instance id but only answers for the instance the Encounter Journal has
+  selected, so the walk now selects each instance before reading its bosses, and
+  puts the player's own journal selection back afterwards.
+  ([#1](https://github.com/JoesphG/BonusRollGate/issues/1), reported and
+  diagnosed by @lostmimic)
+- World bosses no longer appear on the raid difficulty tabs. The journal files
+  an expansion's world bosses under a pseudo-instance in its raid list; those
+  bosses now go to the World Raid and World Boss lists instead.
+  ([#2](https://github.com/JoesphG/BonusRollGate/issues/2))
+
+### Changed
+
+- Boss lists cover the current tier only. Bonus rolls come from current content,
+  so the previous tier the lists used to include was only ever padding.
+  ([#3](https://github.com/JoesphG/BonusRollGate/issues/3))
+
 ## 1.1.0
 
 ### Options panel

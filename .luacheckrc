@@ -14,11 +14,14 @@ local wow_api = {
     "GetDifficultyInfo",
 
     -- Encounter Journal
+    "EJ_GetCurrentInstance",
     "EJ_GetCurrentTier",
     "EJ_GetEncounterInfo",
     "EJ_GetEncounterInfoByIndex",
     "EJ_GetInstanceByIndex",
     "EJ_GetNumTiers",
+    "EJ_GetTierInfo",
+    "EJ_SelectInstance",
     "EJ_SelectTier",
 
     -- Mythic+

@@ -16,8 +16,10 @@ you might actually take.
   "hide everything at this difficulty" switch.
 - **Boss lists build themselves.** Encounters come from the Encounter Journal at
   runtime instead of a hardcoded table, so a new raid tier needs no addon update.
-  Anything the addon is actually offered a roll on is remembered and added to the
-  options too, so nothing falls off the list.
+  The lists cover the current tier, which is where bonus rolls come from: the
+  instanced raid difficulties list instanced bosses and the world difficulties
+  list world bosses. Anything the addon is actually offered a roll on is
+  remembered and added to the options too, so nothing falls off the list.
 - **Mythic+ keystone threshold.** Hide rolls in all Mythic+ dungeons, or only
   below a keystone level you pick.
 - **Delves, dungeons and world bosses** each get their own switch.
@@ -44,20 +46,13 @@ Download from CurseForge, or clone this repository directly into
 `World of Warcraft/_retail_/Interface/AddOns/BonusRollGate`. The Ace3 libraries
 are vendored in `Libs/`, so a clone works as-is with no build step.
 
-## Developing
 
-```
-make test      # run the test suite against a stubbed WoW client
-make lint      # luacheck
-make format    # stylua
-make check     # lint + formatting check
-make package   # build the CurseForge zip locally, uploading nothing
-```
+## Support
 
-`tests/` stubs the parts of the WoW client the addon touches, so the filter's
-decision table can be driven and asserted outside the game. CI runs the suite on
-every push, and a weekly job checks the vendored Ace3 copy against upstream and
-opens a pull request when it drifts.
+Would love any feedback, further ideas or bug reports
+
+https://github.com/JoesphG/BonusRollGate/issues/
+
 
 ## Credits
 

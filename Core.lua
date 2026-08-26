@@ -52,6 +52,14 @@ local OTHER_DIFFICULTIES = {
     DIFF.WORLD_BOSS,
 }
 
+-- Bosses fought out in the open world rather than inside a raid instance. The
+-- journal files them together under a pseudo-instance in its raid list, so the
+-- addon has to sort them back out again.
+local WORLD_DIFFICULTIES = {
+    [DIFF.RAID_WORLD] = true,
+    [DIFF.WORLD_BOSS] = true,
+}
+
 -- Every difficulty that gets its own dedicated control somewhere in the
 -- options tree; anything else the addon runs into lands in "Other content".
 local KNOWN_DIFFICULTIES = {}
@@ -99,51 +107,74 @@ local function DifficultyName(difficultyID)
     return ("Difficulty %d"):format(difficultyID)
 end
 
--- Bosses of the current and previous raid tier, keyed by journal encounter id.
--- Cached for the session: walking the journal is cheap but not free, and the
--- data does not change while you are logged in.
+-- Bosses of the current tier, split by where they are fought: `raid` for
+-- instanced bosses, `world` for the tier's world bosses. Cached for the session:
+-- walking the journal is cheap but not free, and the data does not change while
+-- you are logged in.
 local encounterCache
 
+-- A raid the journal lists with no instance map of its own is the world boss
+-- container. Older builds do not hand back the map id, so fall back to the
+-- container's habit of carrying the expansion's own name.
+local function IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName)
+    if dungeonAreaMapID == 0 then
+        return true
+    end
+    return tierName ~= nil and instanceName == tierName
+end
+
+local function CollectInstanceEncounters(instanceID, instanceName, into)
+    -- EJ_GetEncounterInfoByIndex takes an instance id but only answers for the
+    -- instance the journal currently has selected, so select it first.
+    if EJ_SelectInstance then
+        pcall(EJ_SelectInstance, instanceID)
+    end
+
+    local j = 1
+    while true do
+        local encounterName, _, encounterID = EJ_GetEncounterInfoByIndex(j, instanceID)
+        if not encounterID then
+            break
+        end
+        if encounterName and not into[encounterID] then
+            into[encounterID] = instanceName and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
+                or encounterName
+        end
+        j = j + 1
+    end
+end
+
 local function BuildEncounterList()
-    local list = {}
+    local list = { raid = {}, world = {} }
 
     if not (EJ_GetNumTiers and EJ_GetInstanceByIndex and EJ_GetEncounterInfoByIndex) then
         return list
     end
 
-    local numTiers = EJ_GetNumTiers() or 0
-    if numTiers < 1 then
+    -- Bonus rolls only come from current content, so the newest tier is the
+    -- whole list; anything older would just be padding it out.
+    local tier = EJ_GetNumTiers() or 0
+    if tier < 1 then
         return list
     end
 
-    -- EJ_GetInstanceByIndex reads from the selected tier, so borrow the
-    -- selection and hand it back afterwards.
+    -- EJ_GetInstanceByIndex reads from the selected tier and the boss walk moves
+    -- the selected instance, so borrow both and hand them back afterwards.
     local savedTier = EJ_GetCurrentTier and EJ_GetCurrentTier() or nil
+    local savedInstance = EJ_GetCurrentInstance and EJ_GetCurrentInstance() or nil
 
-    for tier = numTiers, math.max(1, numTiers - 1), -1 do
-        if not pcall(EJ_SelectTier, tier) then
-            break
-        end
+    if pcall(EJ_SelectTier, tier) then
+        local tierName = EJ_GetTierInfo and EJ_GetTierInfo(tier) or nil
 
         local i = 1
         while true do
-            local instanceID, instanceName = EJ_GetInstanceByIndex(i, true)
+            local instanceID, instanceName, _, _, _, _, _, dungeonAreaMapID = EJ_GetInstanceByIndex(i, true)
             if not instanceID then
                 break
             end
 
-            local j = 1
-            while true do
-                local encounterName, _, encounterID = EJ_GetEncounterInfoByIndex(j, instanceID)
-                if not encounterID then
-                    break
-                end
-                if encounterName and not list[encounterID] then
-                    list[encounterID] = instanceName and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
-                        or encounterName
-                end
-                j = j + 1
-            end
+            local bucket = IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName) and list.world or list.raid
+            CollectInstanceEncounters(instanceID, instanceName, bucket)
 
             i = i + 1
         end
@@ -151,6 +182,9 @@ local function BuildEncounterList()
 
     if savedTier and savedTier > 0 then
         pcall(EJ_SelectTier, savedTier)
+    end
+    if savedInstance and savedInstance > 0 and EJ_SelectInstance then
+        pcall(EJ_SelectInstance, savedInstance)
     end
 
     return list
@@ -163,18 +197,34 @@ local function GetEncounterList()
     return encounterCache
 end
 
--- Journal bosses plus anything we have actually been offered a roll on, so a
--- boss the journal does not list still gets a checkbox.
-function BonusRollGate:GetEncounterChoices()
+-- Journal bosses for the difficulty being edited, plus anything we have been
+-- offered a roll on that the journal does not place at all, so a boss the
+-- journal misses still gets a checkbox. Passing no difficulty returns the lot.
+function BonusRollGate:GetEncounterChoices(difficultyID)
+    local journal = GetEncounterList()
     local choices = {}
-    for id, name in pairs(GetEncounterList()) do
-        choices[id] = name
+
+    local sources
+    if difficultyID == nil then
+        sources = { journal.raid, journal.world }
+    elseif WORLD_DIFFICULTIES[difficultyID] then
+        sources = { journal.world }
+    else
+        sources = { journal.raid }
     end
-    for id, name in pairs(self.db.global.seenEncounters) do
-        if not choices[id] then
+
+    for _, source in ipairs(sources) do
+        for id, name in pairs(source) do
             choices[id] = name
         end
     end
+
+    for id, name in pairs(self.db.global.seenEncounters) do
+        if not (choices[id] or journal.raid[id] or journal.world[id]) then
+            choices[id] = name
+        end
+    end
+
     return choices
 end
 
@@ -406,7 +456,7 @@ local function RaidDifficultyGroup(self, difficultyID, order)
                         order = 2,
                         func = function()
                             local encounters = cfg().encounters
-                            for id in pairs(self:GetEncounterChoices()) do
+                            for id in pairs(self:GetEncounterChoices(difficultyID)) do
                                 encounters[id] = true
                             end
                         end,
@@ -418,7 +468,7 @@ local function RaidDifficultyGroup(self, difficultyID, order)
                         order = 3,
                         func = function()
                             local encounters = cfg().encounters
-                            for id in pairs(self:GetEncounterChoices()) do
+                            for id in pairs(self:GetEncounterChoices(difficultyID)) do
                                 encounters[id] = false
                             end
                         end,
@@ -428,7 +478,7 @@ local function RaidDifficultyGroup(self, difficultyID, order)
                         type = "multiselect",
                         order = 4,
                         values = function()
-                            return self:GetEncounterChoices()
+                            return self:GetEncounterChoices(difficultyID)
                         end,
                         set = function(_, key, val)
                             cfg().encounters[key] = val
