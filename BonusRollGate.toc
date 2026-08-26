@@ -1,0 +1,15 @@
+## Interface: 120100
+## Title: BonusRollGate
+## Notes: Hides the bonus roll prompt for the bosses, difficulties and content types you choose.
+## Author: JoesphG
+## Version: 1.0.0
+## SavedVariables: BRG_Data
+## Category-enUS: Loot
+## AllowLoadGameType: mainline
+## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## X-License: MIT
+## X-Credits: Descended from BonusRollFilter by Chawan (public domain)
+## X-Website: https://github.com/JoesphG/BonusRollGate
+
+embeds.xml
+Core.lua
