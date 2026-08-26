@@ -4,6 +4,7 @@
 ## Author: JoesphG
 ## Version: 1.0.0
 ## SavedVariables: BRG_Data
+## X-Curse-Project-ID: 1668946
 ## Category-enUS: Loot
 ## AllowLoadGameType: mainline
 ## IconTexture: Interface\AddOns\BonusRollGate\icon.tga
