@@ -37,6 +37,7 @@ local D = {
     NORMAL = 14,
     HEROIC = 15,
     MYTHIC = 16,
+    FLEX = 233,
     MPLUS = 8,
     DUNGEON_MYTHIC = 23,
     DELVE = 208,
@@ -111,6 +112,16 @@ H.keystoneLevel = 30
 ok(not roll({ difficultyID = D.MPLUS }), "hide-all beats any keystone level")
 
 --------------------------------------------------------------------------------
+describe("mythic flexible obeys mythic")
+reset()
+P.difficulty[D.MYTHIC].hide = true
+ok(not roll({ difficultyID = D.FLEX, encounterID = BOSS.A }), "flex follows a whole-difficulty mythic hide")
+reset()
+P.difficulty[D.MYTHIC].encounters[BOSS.A] = true
+ok(not roll({ difficultyID = D.FLEX, encounterID = BOSS.A }), "flex follows a per-boss mythic hide")
+ok(roll({ difficultyID = D.FLEX, encounterID = BOSS.B }), "an unfiltered boss still shows at flex")
+
+--------------------------------------------------------------------------------
 describe("master switch")
 reset()
 P.difficulty[D.MYTHIC].hide = true
@@ -174,7 +185,8 @@ ok(opts.args.general ~= nil, "has a General tab")
 ok(opts.args.raids ~= nil, "has a Raids tab")
 ok(opts.args.dungeons ~= nil, "has a Dungeons tab")
 ok(opts.args.other ~= nil, "has an Other content tab")
-eq(count(opts.args.raids.args), 7, "one group per raid difficulty")
+eq(count(opts.args.raids.args), 6, "one group per raid difficulty")
+ok(opts.args.raids.args["diff233"] == nil, "Mythic flexible has no group of its own")
 
 local bosses = opts.args.raids.args["diff16"].args.perBoss.args.bosses.values()
 for _, id in ipairs(H.encounterIDs) do

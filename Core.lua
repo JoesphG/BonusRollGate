@@ -21,8 +21,10 @@ local DIFF = {
     RAID_HEROIC = D.PrimaryRaidHeroic or 15,
     RAID_MYTHIC = D.PrimaryRaidMythic or 16,
     RAID_STORY = D.RaidStory or 220,
-    RAID_FLEX = D.RaidMythicFlexible or 233,
     RAID_WORLD = D.RaidWorld or 250,
+    -- Flexible-size Mythic. The client calls it "Mythic" too, so it gets no
+    -- control of its own and is folded into Mythic at filter time.
+    RAID_FLEX = D.RaidMythicFlexible or 233,
     DUNGEON_NORMAL = D.DungeonNormal or 1,
     DUNGEON_HEROIC = D.DungeonHeroic or 2,
     DUNGEON_MYTHIC = D.DungeonMythic or 23,
@@ -36,7 +38,6 @@ local RAID_DIFFICULTIES = {
     DIFF.RAID_NORMAL,
     DIFF.RAID_HEROIC,
     DIFF.RAID_MYTHIC,
-    DIFF.RAID_FLEX,
     DIFF.RAID_STORY,
     DIFF.RAID_WORLD,
 }
@@ -68,6 +69,7 @@ for _, list in ipairs({ RAID_DIFFICULTIES, DUNGEON_DIFFICULTIES, OTHER_DIFFICULT
     end
 end
 KNOWN_DIFFICULTIES[DIFF.MYTHIC_PLUS] = true
+KNOWN_DIFFICULTIES[DIFF.RAID_FLEX] = true
 
 local DB_SCHEMA = 1
 
@@ -272,7 +274,6 @@ local DIFFICULTY_COLOR = {
     [DIFF.RAID_NORMAL] = "ffffffff",
     [DIFF.RAID_HEROIC] = "ff0070dd",
     [DIFF.RAID_MYTHIC] = "ffa335ee",
-    [DIFF.RAID_FLEX] = "ffa335ee",
     [DIFF.RAID_STORY] = "ff1eff00",
     [DIFF.RAID_WORLD] = "ffff8000",
     [DIFF.DUNGEON_NORMAL] = "ffffffff",
@@ -870,6 +871,11 @@ end
 function BonusRollGate:ShouldHide(info)
     local profile = self.db.profile
     local difficultyID = info.difficultyID or 0
+
+    -- Flexible-size Mythic has no controls of its own; it obeys Mythic's.
+    if difficultyID == DIFF.RAID_FLEX then
+        difficultyID = DIFF.RAID_MYTHIC
+    end
 
     if difficultyID == DIFF.MYTHIC_PLUS then
         local mp = profile.mythicPlus
