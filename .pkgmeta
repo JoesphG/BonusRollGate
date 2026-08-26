@@ -1,5 +1,9 @@
 package-as: BonusRollGate
 
+# Use the hand-written changelog for release notes instead of letting the
+# packager generate one from commit messages.
+manual-changelog: CHANGELOG.md
+
 # Libraries are vendored in Libs/ rather than pulled as externals, so a clone of
 # this repo can be dropped straight into Interface/AddOns and just work.
 
@@ -8,4 +12,3 @@ ignore:
   - .gitignore
   - .pkgmeta
   - README.md
-  - CHANGELOG.md
