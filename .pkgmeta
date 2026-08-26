@@ -1,0 +1,11 @@
+package-as: BonusRollGate
+
+# Libraries are vendored in Libs/ rather than pulled as externals, so a clone of
+# this repo can be dropped straight into Interface/AddOns and just work.
+
+ignore:
+  - .github
+  - .gitignore
+  - .pkgmeta
+  - README.md
+  - CHANGELOG.md
