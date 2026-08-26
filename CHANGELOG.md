@@ -17,6 +17,12 @@
 
 ### Changed
 
+- Each difficulty lists only the bosses it is actually offered at. A one-boss
+  instance run at World, Normal, Heroic and Mythic no longer turns up on the LFR
+  list. Instances the journal will not answer for are still listed everywhere.
+- The Mythic flexible tab is gone. The client calls difficulty 233 "Mythic" as
+  well, so it was a second tab under the same name; rolls at 233 now obey the
+  Mythic settings.
 - Boss lists cover the current tier only. Bonus rolls come from current content,
   so the previous tier the lists used to include was only ever padding.
   ([#3](https://github.com/JoesphG/BonusRollGate/issues/3))

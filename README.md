@@ -12,8 +12,9 @@ you might actually take.
 ## Features
 
 - **Per-boss filtering for raids.** Every raid difficulty — LFR, Normal, Heroic,
-  Mythic, Mythic flexible, Story and World — gets its own boss list plus a
-  "hide everything at this difficulty" switch.
+  Mythic, Story and World — gets its own boss list plus a "hide everything at
+  this difficulty" switch. Each list holds only the bosses that difficulty is
+  actually offered at.
 - **Boss lists build themselves.** Encounters come from the Encounter Journal at
   runtime instead of a hardcoded table, so a new raid tier needs no addon update.
   The lists cover the current tier, which is where bonus rolls come from, and

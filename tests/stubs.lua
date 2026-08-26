@@ -86,10 +86,22 @@ local ejTiers = {
                 id = 1300,
                 name = "Voidscar Bastion",
                 areaMapID = 2500,
+                difficulties = { 17, 14, 15, 16 },
                 bosses = {
                     { "Warden Kaelis", 2900 },
                     { "The Hollow Choir", 2901 },
                     { "Nal'thelun", 2902 },
+                },
+            },
+            {
+                -- A one-boss instance run at World, Normal, Heroic or Mythic,
+                -- the way The Tidebound Grotto is. No LFR.
+                id = 1302,
+                name = "The Tidebound Grotto",
+                areaMapID = 2501,
+                difficulties = { 250, 14, 15, 16 },
+                bosses = {
+                    { "Nymrissa Wavecaller", 2960 },
                 },
             },
             {
@@ -109,6 +121,7 @@ local ejTiers = {
                 id = 1200,
                 name = "Liberation of Undermine",
                 areaMapID = 2400,
+                difficulties = { 17, 14, 15, 16 },
                 bosses = {
                     { "Vexie and the Geargrinders", 2800 },
                 },
@@ -153,6 +166,18 @@ function EJ_GetInstanceByIndex(i)
     end
     return inst.id, inst.name, "desc", nil, nil, nil, nil, inst.areaMapID
 end
+function EJ_IsValidInstanceDifficulty(difficultyID)
+    local inst = ejInstanceByID(EJ_INSTANCE)
+    if not (inst and inst.difficulties) then
+        return false
+    end
+    for _, id in ipairs(inst.difficulties) do
+        if id == difficultyID then
+            return true
+        end
+    end
+    return false
+end
 function EJ_GetEncounterInfoByIndex(j, instanceID)
     -- The bug from issue #1: without a matching EJ_SelectInstance this is nil.
     if EJ_INSTANCE ~= instanceID then
@@ -178,6 +203,7 @@ function EJ_GetEncounterInfo(id)
 end
 
 H.encounterIDs = { 2900, 2901, 2902 }
+H.worldRaidEncounterID = 2960
 H.worldEncounterIDs = { 2950 }
 H.previousTierEncounterIDs = { 2800 }
 H.tierWhenLoaded = function()

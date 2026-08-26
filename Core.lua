@@ -124,12 +124,35 @@ local function IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName)
     return tierName ~= nil and instanceName == tierName
 end
 
-local function CollectInstanceEncounters(instanceID, instanceName, into)
+-- Which of our raid difficulties the selected instance actually offers, so a
+-- one-boss instance run at World, Normal, Heroic and Mythic does not turn up on
+-- the LFR list. Returns nil when the journal will not say, and an unanswered
+-- instance is listed everywhere rather than nowhere.
+local function InstanceDifficulties()
+    if not EJ_IsValidInstanceDifficulty then
+        return nil
+    end
+
+    local valid, answered = {}, false
+    for _, difficultyID in ipairs(RAID_DIFFICULTIES) do
+        local ok, isValid = pcall(EJ_IsValidInstanceDifficulty, difficultyID)
+        if ok and isValid then
+            valid[difficultyID] = true
+            answered = true
+        end
+    end
+
+    return answered and valid or nil
+end
+
+local function CollectInstanceEncounters(instanceID, instanceName, into, validAt)
     -- EJ_GetEncounterInfoByIndex takes an instance id but only answers for the
     -- instance the journal currently has selected, so select it first.
     if EJ_SelectInstance then
         pcall(EJ_SelectInstance, instanceID)
     end
+
+    local difficulties = InstanceDifficulties()
 
     local j = 1
     while true do
@@ -140,13 +163,14 @@ local function CollectInstanceEncounters(instanceID, instanceName, into)
         if encounterName and not into[encounterID] then
             into[encounterID] = instanceName and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
                 or encounterName
+            validAt[encounterID] = difficulties
         end
         j = j + 1
     end
 end
 
 local function BuildEncounterList()
-    local list = { raid = {}, world = {} }
+    local list = { raid = {}, world = {}, validAt = {} }
 
     if not (EJ_GetNumTiers and EJ_GetInstanceByIndex and EJ_GetEncounterInfoByIndex) then
         return list
@@ -175,7 +199,7 @@ local function BuildEncounterList()
             end
 
             local bucket = IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName) and list.world or list.raid
-            CollectInstanceEncounters(instanceID, instanceName, bucket)
+            CollectInstanceEncounters(instanceID, instanceName, bucket, list.validAt)
 
             i = i + 1
         end
@@ -216,7 +240,10 @@ function BonusRollGate:GetEncounterChoices(difficultyID)
 
     for _, source in ipairs(sources) do
         for id, name in pairs(source) do
-            choices[id] = name
+            local validAt = journal.validAt[id]
+            if difficultyID == nil or validAt == nil or validAt[difficultyID] then
+                choices[id] = name
+            end
         end
     end
 

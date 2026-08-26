@@ -37,6 +37,7 @@ local D = {
     NORMAL = 14,
     HEROIC = 15,
     MYTHIC = 16,
+    STORY = 220,
     FLEX = 233,
     MPLUS = 8,
     DUNGEON_MYTHIC = 23,
@@ -50,8 +51,8 @@ local BOSS = { A = 2900, B = 2901, C = 2902 }
 local function reset()
     for _, id in pairs(D) do
         P.difficulty[id].hide = false
-        for _, b in pairs(BOSS) do
-            P.difficulty[id].encounters[b] = false
+        for encounterID in pairs(P.difficulty[id].encounters) do
+            P.difficulty[id].encounters[encounterID] = false
         end
     end
     P.enabled = true
@@ -209,9 +210,10 @@ for _, id in ipairs(H.encounterIDs) do
     ok(worldBosses[id] == nil, "raid boss " .. id .. " is not listed under World Boss")
 end
 -- World is a difficulty of real raid instances, not of the world boss container
-for _, id in ipairs(H.encounterIDs) do
-    ok(A:GetEncounterChoices(D.WORLD_RAID)[id] ~= nil, "World Raid lists instanced boss " .. id)
-end
+ok(
+    A:GetEncounterChoices(D.WORLD_RAID)[H.worldRaidEncounterID] ~= nil,
+    "World Raid lists the instanced boss that offers World"
+)
 ok(
     A:GetEncounterChoices(D.WORLD_RAID)[H.worldEncounterIDs[1]] == nil,
     "World Raid does not list the world boss container"
@@ -225,6 +227,27 @@ ok(
     "a world boss seen in play still stays off the raid list"
 )
 ok(A:GetEncounterChoices(D.MYTHIC)[4242] ~= nil, "a boss the journal does not place at all is still offered everywhere")
+
+--------------------------------------------------------------------------------
+describe("each difficulty lists only the bosses it is offered at")
+reset()
+local N = H.worldRaidEncounterID
+for _, id in ipairs({ D.WORLD_RAID, D.NORMAL, D.HEROIC, D.MYTHIC }) do
+    ok(A:GetEncounterChoices(id)[N] ~= nil, "Nymrissa is listed at difficulty " .. id)
+end
+ok(A:GetEncounterChoices(D.LFR)[N] == nil, "Nymrissa is not listed at LFR, which her instance does not offer")
+ok(A:GetEncounterChoices(D.STORY)[N] == nil, "nor at Story")
+
+for _, id in ipairs(H.encounterIDs) do
+    ok(A:GetEncounterChoices(D.LFR)[id] ~= nil, "the LFR raid still lists boss " .. id)
+    ok(A:GetEncounterChoices(D.WORLD_RAID)[id] == nil, "the LFR raid is not listed at World")
+end
+
+-- filtering is unchanged: the list only decides what gets a checkbox
+reset()
+P.difficulty[D.NORMAL].encounters[N] = true
+ok(not roll({ difficultyID = D.NORMAL, encounterID = N }), "Nymrissa hides on normal")
+ok(roll({ difficultyID = D.WORLD_RAID, encounterID = N }), "and still shows at World until ticked there")
 
 --------------------------------------------------------------------------------
 describe("boss lists cover the current tier only")

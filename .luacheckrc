@@ -21,6 +21,7 @@ local wow_api = {
     "EJ_GetInstanceByIndex",
     "EJ_GetNumTiers",
     "EJ_GetTierInfo",
+    "EJ_IsValidInstanceDifficulty",
     "EJ_SelectInstance",
     "EJ_SelectTier",
 
