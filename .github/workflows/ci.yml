@@ -40,14 +40,31 @@ jobs:
         with:
           fetch-depth: 0
 
+      # A commit that already carries a release tag is packaged by release.yml.
+      # The packager refuses to build it a second time here ("Found future
+      # tag, not packaging"), which would leave the checks below with no
+      # package to look at, so skip them instead of failing on an empty dir.
+      - name: Check whether this commit is already tagged
+        id: tagged
+        run: |
+          tags=$(git tag --points-at HEAD)
+          if [ -n "$tags" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "HEAD carries $tags -- release.yml packages this commit."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # Builds the zip exactly as a release would, but uploads nothing. Catches
       # a broken .pkgmeta or TOC here rather than at tag time.
       - name: Packager dry run
+        if: steps.tagged.outputs.skip != 'true'
         uses: BigWigsMods/packager@v2.5.1
         with:
           args: -d -z
 
       - name: Confirm the addon files are present
+        if: steps.tagged.outputs.skip != 'true'
         run: |
           set -e
           pkg=".release/BonusRollGate"
