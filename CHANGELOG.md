@@ -10,6 +10,9 @@
   puts the player's own journal selection back afterwards.
   ([#1](https://github.com/JoesphG/BonusRollGate/issues/1), reported and
   diagnosed by @lostmimic)
+- Boss counts on the Raids sidebar counted ticks the page no longer shows a
+  checkbox for, so a difficulty could claim more hidden bosses than it listed.
+  Only listed bosses count now.
 - World bosses no longer appear on the raid difficulty tabs. The journal files
   an expansion's world bosses under a pseudo-instance in its raid list, and they
   belong to the World Boss difficulty alone.

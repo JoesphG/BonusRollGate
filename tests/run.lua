@@ -280,6 +280,17 @@ P.difficulty[D.LFR].hide = true
 ok(A:DifficultyLabel(D.LFR):find("(all)", 1, true) ~= nil, "tree label marks a whole-difficulty hide")
 ok(A:StatusText():find("Currently hiding") ~= nil, "status lists active filters")
 
+-- a tick for a boss this difficulty does not list must not inflate the count
+reset()
+P.difficulty[D.LFR].encounters[H.worldRaidEncounterID] = true
+eq(A:HiddenCount(D.LFR), 0, "a tick with no checkbox beside it is not counted")
+ok(A:StatusText():find("Nothing is filtered yet") ~= nil, "nor does it reach the status line")
+ok(
+    not roll({ difficultyID = D.LFR, encounterID = H.worldRaidEncounterID }),
+    "but it still filters, should a roll somehow arrive"
+)
+eq(A:HiddenCount(D.NORMAL), 0, "and it stays scoped to its own difficulty")
+
 reset()
 ok(A:StatusText():find("Nothing is filtered yet") ~= nil, "status says so when nothing is filtered")
 P.enabled = false

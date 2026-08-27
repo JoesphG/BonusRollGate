@@ -321,11 +321,17 @@ local function ColoredDifficulty(difficultyID)
     return colored(DifficultyName(difficultyID), DIFFICULTY_COLOR[difficultyID] or "ffffffff")
 end
 
--- Count of bosses explicitly hidden at a difficulty, for the tree labels.
+-- Count of bosses explicitly hidden at a difficulty, for the tree labels. Only
+-- bosses the difficulty actually lists are counted: a tick left in the profile
+-- by an older, wider boss list would otherwise show as a count with no checkbox
+-- beside it. Such a tick is unreachable anyway -- if the difficulty does not
+-- offer the boss, no roll can arrive for it -- but it stays in the profile as a
+-- safety net rather than being pruned.
 function BonusRollGate:HiddenCount(difficultyID)
+    local encounters = self.db.profile.difficulty[difficultyID].encounters
     local n = 0
-    for _, hidden in pairs(self.db.profile.difficulty[difficultyID].encounters) do
-        if hidden == true then
+    for id in pairs(self:GetEncounterChoices(difficultyID)) do
+        if encounters[id] == true then
             n = n + 1
         end
     end
