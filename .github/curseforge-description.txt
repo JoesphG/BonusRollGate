@@ -1,3 +1,7 @@
+[i]Image URLs below are permalinks into the GitHub repo, pinned to a commit so
+they cannot break. If CurseForge strips them, re-upload the three PNGs on the
+project's Images tab and swap in the CDN URLs it gives back.[/i]
+
 [b]Spend your Voidcores where you meant to.[/b]
 
 BonusRollGate hides the bonus roll prompt for the bosses, difficulties and
@@ -28,7 +32,7 @@ lists every filter currently in force — whole difficulties and boss counts
 together — so you never have to open each tab to find out what is being hidden.
 "Clear every filter" resets the lot behind a confirmation.
 
-[IMG]UPLOAD General.png AND PASTE ITS CURSEFORGE URL HERE[/IMG]
+[IMG]https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/General.png[/IMG]
 
 [size=5]The Raids tab[/size]
 
@@ -38,7 +42,7 @@ individual bosses are. Each list holds only the bosses that difficulty is
 actually offered at, so a one-boss instance run at World, Normal, Heroic and
 Mythic stays off the Looking For Raid list.
 
-[IMG]UPLOAD raids.png AND PASTE ITS CURSEFORGE URL HERE[/IMG]
+[IMG]https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/raids.png[/IMG]
 
 [size=5]The Dungeons tab[/size]
 
@@ -46,7 +50,7 @@ Mythic+ can be hidden outright or only below a keystone level you pick, so the
 +2 you ran for the weekly stops prompting while your real keys still do. Normal,
 Heroic and Mythic dungeons get plain switches underneath.
 
-[IMG]UPLOAD dungeons.png AND PASTE ITS CURSEFORGE URL HERE[/IMG]
+[IMG]https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/dungeons.png[/IMG]
 
 [size=5]Commands[/size]
 
