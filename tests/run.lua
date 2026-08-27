@@ -1,7 +1,5 @@
 -- BonusRollGate test suite. Run with: lua5.1 tests/run.lua
---
--- Loads Core.lua against a stubbed WoW client and drives the filter the way
--- Blizzard would, so the decision table stays honest across API changes.
+-- Drives Core.lua against a stubbed WoW client, the way Blizzard would.
 
 package.path = "tests/?.lua;" .. package.path
 local H = require("stubs")

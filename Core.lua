@@ -1,10 +1,6 @@
--- BonusRollGate
--- Hides the Blizzard bonus roll prompt for content you do not want to spend
--- Voidcores on. Boss lists are built from the Encounter Journal at runtime
--- rather than hard coded, so a new raid tier needs no addon update.
---
--- Descended from BonusRollFilter by Chawan (public domain), rebuilt for
--- Midnight 12.1.
+-- BonusRollGate -- hides the bonus roll prompt for content you have ruled out.
+-- Boss lists come from the Encounter Journal at runtime, so a new tier needs no
+-- addon update. Descended from BonusRollFilter by Chawan (public domain).
 
 local ADDON_NAME = ...
 
@@ -12,8 +8,7 @@ local BonusRollGate = LibStub("AceAddon-3.0"):NewAddon("BonusRollGate", "AceEven
 
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
 
--- Difficulty ids. DifficultyUtil.ID is Blizzard's own table; the literals are
--- only a fallback in case it ever moves.
+-- DifficultyUtil.ID is Blizzard's table; the literals are a fallback.
 local D = DifficultyUtil and DifficultyUtil.ID or {}
 local DIFF = {
     RAID_LFR = D.PrimaryRaidLFR or 17,
@@ -53,15 +48,13 @@ local OTHER_DIFFICULTIES = {
     DIFF.WORLD_BOSS,
 }
 
--- Difficulties whose bosses come from the journal's world boss pseudo-instance.
--- World (250) is not one of them: it is a difficulty real raid instances offer
--- alongside Normal, Heroic and Mythic, so it takes the instanced boss list.
+-- Draws on the journal's world boss pseudo-instance. World (250) does not: real
+-- raid instances offer it, so it takes the instanced list.
 local WORLD_DIFFICULTIES = {
     [DIFF.WORLD_BOSS] = true,
 }
 
--- Every difficulty that gets its own dedicated control somewhere in the
--- options tree; anything else the addon runs into lands in "Other content".
+-- Has a dedicated control somewhere; anything else lands in "Other content".
 local KNOWN_DIFFICULTIES = {}
 for _, list in ipairs({ RAID_DIFFICULTIES, DUNGEON_DIFFICULTIES, OTHER_DIFFICULTIES }) do
     for _, id in ipairs(list) do
@@ -108,15 +101,11 @@ local function DifficultyName(difficultyID)
     return ("Difficulty %d"):format(difficultyID)
 end
 
--- Bosses of the current tier, split by where they are fought: `raid` for
--- instanced bosses, `world` for the tier's world bosses. Cached for the session:
--- walking the journal is cheap but not free, and the data does not change while
--- you are logged in.
+-- Current-tier bosses, split into `raid` and `world`. Cached for the session.
 local encounterCache
 
--- A raid the journal lists with no instance map of its own is the world boss
--- container. Older builds do not hand back the map id, so fall back to the
--- container's habit of carrying the expansion's own name.
+-- The world boss container has no instance map. Falls back to its habit of
+-- carrying the expansion's name when the journal withholds the map id.
 local function IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName)
     if dungeonAreaMapID == 0 then
         return true
@@ -124,10 +113,8 @@ local function IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName)
     return tierName ~= nil and instanceName == tierName
 end
 
--- Which of our raid difficulties the selected instance actually offers, so a
--- one-boss instance run at World, Normal, Heroic and Mythic does not turn up on
--- the LFR list. Returns nil when the journal will not say, and an unanswered
--- instance is listed everywhere rather than nowhere.
+-- Raid difficulties the selected instance offers. nil when the journal will not
+-- say, which lists the instance everywhere rather than nowhere.
 local function InstanceDifficulties()
     if not EJ_IsValidInstanceDifficulty then
         return nil
@@ -146,8 +133,7 @@ local function InstanceDifficulties()
 end
 
 local function CollectInstanceEncounters(instanceID, instanceName, into, validAt)
-    -- EJ_GetEncounterInfoByIndex takes an instance id but only answers for the
-    -- instance the journal currently has selected, so select it first.
+    -- EJ_GetEncounterInfoByIndex only answers for the selected instance.
     if EJ_SelectInstance then
         pcall(EJ_SelectInstance, instanceID)
     end
@@ -176,15 +162,13 @@ local function BuildEncounterList()
         return list
     end
 
-    -- Bonus rolls only come from current content, so the newest tier is the
-    -- whole list; anything older would just be padding it out.
+    -- Rolls only come from current content, so the newest tier is the whole list.
     local tier = EJ_GetNumTiers() or 0
     if tier < 1 then
         return list
     end
 
-    -- EJ_GetInstanceByIndex reads from the selected tier and the boss walk moves
-    -- the selected instance, so borrow both and hand them back afterwards.
+    -- The walk moves the selected tier and instance; borrow both, hand them back.
     local savedTier = EJ_GetCurrentTier and EJ_GetCurrentTier() or nil
     local savedInstance = EJ_GetCurrentInstance and EJ_GetCurrentInstance() or nil
 
@@ -222,9 +206,8 @@ local function GetEncounterList()
     return encounterCache
 end
 
--- Journal bosses for the difficulty being edited, plus anything we have been
--- offered a roll on that the journal does not place at all, so a boss the
--- journal misses still gets a checkbox. Passing no difficulty returns the lot.
+-- Bosses for one difficulty, plus any the journal does not place at all. No
+-- difficulty returns the lot.
 function BonusRollGate:GetEncounterChoices(difficultyID)
     local journal = GetEncounterList()
     local choices = {}
@@ -321,12 +304,8 @@ local function ColoredDifficulty(difficultyID)
     return colored(DifficultyName(difficultyID), DIFFICULTY_COLOR[difficultyID] or "ffffffff")
 end
 
--- Count of bosses explicitly hidden at a difficulty, for the tree labels. Only
--- bosses the difficulty actually lists are counted: a tick left in the profile
--- by an older, wider boss list would otherwise show as a count with no checkbox
--- beside it. Such a tick is unreachable anyway -- if the difficulty does not
--- offer the boss, no roll can arrive for it -- but it stays in the profile as a
--- safety net rather than being pruned.
+-- Bosses hidden at a difficulty, counting only the ones it lists. A tick left by
+-- an older, wider list is unreachable, but stays in the profile as a safety net.
 function BonusRollGate:HiddenCount(difficultyID)
     local encounters = self.db.profile.difficulty[difficultyID].encounters
     local n = 0
@@ -865,9 +844,8 @@ function BonusRollGate:OnUserAction()
     self.userAction = true
 end
 
--- Reads the roll off the frame, filling in anything Blizzard left blank from
--- the first time we saw the same spell. A prompt re-issued after a loading
--- screen can come back without instance data.
+-- Reads the roll off the frame, filling blanks from the first sighting of the
+-- same spell: a prompt re-issued after a loading screen loses its instance data.
 function BonusRollGate:CaptureRollInfo(frame)
     local spellID = frame.spellID
     local difficultyID = frame.difficultyID

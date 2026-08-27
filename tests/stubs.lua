@@ -1,7 +1,6 @@
--- Stub WoW client + Ace3 so Core.lua can be loaded and driven under plain
--- Lua 5.1. Only the surface BonusRollGate actually touches is emulated; the
--- AceDB stub reproduces the ["*"] wildcard-default semantics the real library
--- provides, because the filter relies on them.
+-- Stub WoW client + Ace3 so Core.lua runs under plain Lua 5.1. Only the surface
+-- the addon touches is emulated. AceDB's ["*"] wildcard defaults are reproduced
+-- because the filter relies on them.
 
 local H = {}
 
@@ -71,10 +70,9 @@ Settings = {
     end,
 }
 
--- Encounter Journal. The newest tier holds one raid, plus the pseudo-instance
--- the journal files world bosses under (no instance map, named after the
--- expansion); the tier before it holds a raid of its own. As on the live
--- client, EJ_GetEncounterInfoByIndex only answers for the selected instance.
+-- Encounter Journal. Newest tier: one raid, a one-boss instance, and the world
+-- boss pseudo-instance. Previous tier: one raid. As on the live client,
+-- EJ_GetEncounterInfoByIndex only answers for the selected instance.
 local EJ_TIER, NEWEST_TIER = 1, 3
 local EJ_INSTANCE = nil
 
@@ -265,8 +263,8 @@ libs["AceAddon-3.0"] = {
     end,
 }
 
--- Mirrors AceDB's copyDefaults: a "*" table default installs an __index that
--- materialises a fresh copy per key on first access.
+-- Mirrors AceDB's copyDefaults: "*" installs an __index that materialises a
+-- fresh copy per key on first access.
 local function copyDefaults(dest, src)
     for k, v in pairs(src) do
         if k == "*" then

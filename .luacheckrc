@@ -1,5 +1,4 @@
--- luacheck configuration. The WoW client injects a large global API; anything
--- BonusRollGate reads from it is declared here so real problems stand out.
+-- Every WoW global the addon reads is declared here, so real problems stand out.
 
 local wow_api = {
     -- Libraries
@@ -54,8 +53,7 @@ globals = {
 
 read_globals = wow_api
 
--- The test stubs exist precisely to define the client API, so there they are
--- writable rather than read-only.
+-- The stubs define the client API, so there it is writable.
 files["tests/"] = {
     globals = wow_api,
     ignore = { "212" }, -- stub signatures mirror Blizzard's, unused args and all

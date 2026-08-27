@@ -1,12 +1,10 @@
 package-as: BonusRollGate
 
-# Use the hand-written changelog for release notes instead of letting the
-# packager generate one from commit messages.
+# Release notes come from the hand-written changelog, not commit messages.
 manual-changelog: CHANGELOG.md
 
-# Libraries are vendored in Libs/ rather than pulled as externals, so a clone of
-# this repo can be dropped straight into Interface/AddOns and just work.
-# .github/workflows/check-libs.yml watches them for upstream updates.
+# Libraries are vendored in Libs/, not pulled as externals, so a clone drops
+# straight into Interface/AddOns. check-libs.yml watches them for updates.
 
 ignore:
   - .github
