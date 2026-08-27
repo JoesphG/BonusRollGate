@@ -4,39 +4,27 @@
 
 ### Fixed
 
-- Boss counts on the Raids sidebar counted ticks the page no longer shows a
-  checkbox for, so a difficulty could claim more hidden bosses than it listed.
-  Only listed bosses count now.
+- Boss counts now count only bosses the difficulty lists.
 
 ### Documentation
 
-- Screenshots of the General, Raids and Dungeons tabs in the README.
+- Screenshots of the General, Raids and Dungeons tabs.
 
 ## 1.1.1
 
 ### Fixed
 
-- The per-boss lists came up empty. `EJ_GetEncounterInfoByIndex` takes an
-  instance id but only answers for the instance the Encounter Journal has
-  selected, so the walk now selects each instance before reading its bosses, and
-  puts the player's own journal selection back afterwards.
-  ([#1](https://github.com/JoesphG/BonusRollGate/issues/1), reported and
-  diagnosed by @lostmimic)
-- World bosses no longer appear on the raid difficulty tabs. The journal files
-  an expansion's world bosses under a pseudo-instance in its raid list, and they
-  belong to the World Boss difficulty alone.
+- Per-boss lists came up empty; the journal walk now selects each instance
+  first. ([#1](https://github.com/JoesphG/BonusRollGate/issues/1), diagnosed by
+  @lostmimic)
+- World bosses no longer appear on the raid difficulty tabs.
   ([#2](https://github.com/JoesphG/BonusRollGate/issues/2))
 
 ### Changed
 
-- Each difficulty lists only the bosses it is actually offered at. A one-boss
-  instance run at World, Normal, Heroic and Mythic no longer turns up on the LFR
-  list. Instances the journal will not answer for are still listed everywhere.
-- The Mythic flexible tab is gone. The client calls difficulty 233 "Mythic" as
-  well, so it was a second tab under the same name; rolls at 233 now obey the
-  Mythic settings.
-- Boss lists cover the current tier only. Bonus rolls come from current content,
-  so the previous tier the lists used to include was only ever padding.
+- Each difficulty lists only the bosses it is offered at.
+- Removed the Mythic flexible tab; difficulty 233 obeys Mythic.
+- Boss lists cover the current tier only.
   ([#3](https://github.com/JoesphG/BonusRollGate/issues/3))
 
 ## 1.1.0
