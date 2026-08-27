@@ -27,6 +27,36 @@ you might actually take.
 - **Nothing is lost.** A hidden roll is only hidden — `/brg show` brings it back
   as long as the timer hasn't run out.
 
+## Screenshots
+
+### General
+
+The master switch, the chat announcement toggle, and an "At a glance" panel that
+lists every filter currently in force — whole difficulties and boss counts
+together — so you never have to open each tab to find out what is being hidden.
+"Clear every filter" resets the lot behind a confirmation.
+
+![The General tab](images/General.png)
+
+### Raids
+
+Each raid difficulty is its own page. The sidebar doubles as a summary: `(all)`
+means every roll at that difficulty is hidden, a number means that many
+individual bosses are. Bosses come from the Encounter Journal, and each list
+holds only the bosses that difficulty is actually offered at — so a one-boss
+instance run at World, Normal, Heroic and Mythic stays off the Looking For Raid
+list.
+
+![The Raids tab](images/raids.png)
+
+### Dungeons
+
+Mythic+ can be hidden outright or only below a keystone level you pick, so the
++2 you ran for the weekly stops prompting while your real keys still do. Normal,
+Heroic and Mythic dungeons get plain switches underneath.
+
+![The Dungeons tab](images/dungeons.png)
+
 ## Commands
 
 | Command | Effect |
