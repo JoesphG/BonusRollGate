@@ -5,6 +5,7 @@
 ## Version: 1.1.2
 ## SavedVariables: BRG_Data
 ## X-Curse-Project-ID: 1668946
+## X-Wago-ID: 5NR8O5K3
 ## Category-enUS: Loot
 ## AllowLoadGameType: mainline
 ## IconTexture: Interface\AddOns\BonusRollGate\icon.tga
