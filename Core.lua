@@ -995,6 +995,7 @@ function BonusRollGate:PrintCommands()
     self:Print("  " .. cmd("/brg toggle") .. "  turn filtering on or off")
     self:Print("  " .. cmd("/brg status") .. "  list what is currently filtered")
     self:Print("  " .. cmd("/bonusrollgate") .. " works anywhere /brg does")
+    self:Print("Support: " .. cmd("https://discord.gg/zHT3bGEQ52"))
 end
 
 function BonusRollGate:OpenOptions()

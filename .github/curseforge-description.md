@@ -66,8 +66,11 @@ Heroic and Mythic dungeons get plain switches underneath.
 | `/brg toggle` | Turn filtering on and off |
 | `/brg status` | Print the current filters to chat |
 
-## Source and issues
+## Support
 
-[github.com/JoesphG/BonusRollGate](https://github.com/JoesphG/BonusRollGate)
+Questions, ideas and bug reports are all welcome.
+
+- Discord: [discord.gg/zHT3bGEQ52](https://discord.gg/zHT3bGEQ52)
+- Source and issues: [github.com/JoesphG/BonusRollGate](https://github.com/JoesphG/BonusRollGate)
 
 Descended from BonusRollFilter by Chawan (public domain). MIT licensed.

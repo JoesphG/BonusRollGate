@@ -80,9 +80,12 @@ are vendored in `Libs/`, so a clone works as-is with no build step.
 
 ## Support
 
-Would love any feedback, further ideas or bug reports
+Would love any feedback, further ideas or bug reports.
 
-https://github.com/JoesphG/BonusRollGate/issues/
+- Discord: https://discord.gg/zHT3bGEQ52
+- Issues: https://github.com/JoesphG/BonusRollGate/issues/
+
+Bug reports go further with your addon version, from `/brg status`.
 
 
 ## Credits

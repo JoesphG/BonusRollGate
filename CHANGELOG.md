@@ -2,6 +2,10 @@
 
 ## 1.1.3
 
+### Added
+
+- Discord server for support: https://discord.gg/zHT3bGEQ52
+
 ### Documentation
 
 - CurseForge description in Markdown, with permalinked screenshots.
