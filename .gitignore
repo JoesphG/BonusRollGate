@@ -2,5 +2,6 @@
 *.bak
 .DS_Store
 
-# Discord bot token.
+# Discord bot token, and the poll's last-handled marker.
 tools/discord.env
+tools/discord-poll.state
