@@ -82,10 +82,24 @@ are vendored in `Libs/`, so a clone works as-is with no build step.
 
 Would love any feedback, further ideas or bug reports.
 
-- Discord: https://discord.gg/zHT3bGEQ52
-- Issues: https://github.com/JoesphG/BonusRollGate/issues/
+- **Discord:** https://discord.gg/zHT3bGEQ52 — `#support` for bugs and help,
+  `#ideas` for feature requests, `#announcements` for release notes.
+- **Issues:** https://github.com/JoesphG/BonusRollGate/issues/
 
-Bug reports go further with your addon version, from `/brg status`.
+Either is fine. A bug report gets fixed faster with:
+
+```
+Addon version:      (from /brg status)
+Game version:       (bottom of the character select screen)
+What I expected:
+What happened:
+Steps to reproduce:
+Lua error (if any):
+```
+
+`/brg status` prints the version and every filter currently in force, which is
+usually the whole diagnosis. If there is a Lua error, paste the full text from
+BugSack rather than the first line.
 
 
 ## Credits
