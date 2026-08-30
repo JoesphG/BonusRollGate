@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+
+### Documentation
+
+- CurseForge description in Markdown, with permalinked screenshots.
+
 ## 1.1.2
 
 ### Fixed
