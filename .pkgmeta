@@ -18,3 +18,4 @@ ignore:
   - images
   - stylua.toml
   - tests
+  - tools
