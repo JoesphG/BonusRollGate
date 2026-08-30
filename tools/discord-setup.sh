@@ -87,22 +87,37 @@ ANNOUNCE=$(channel "announcements" "$INFO" "Release notes. Posted automatically 
 channel "start-here" "$INFO" "What BonusRollGate does and how to report a bug." >/dev/null
 channel "support" "$TALK" "Bug reports and help. Include your addon version from /brg status." >/dev/null
 channel "ideas" "$TALK" "Feature requests." >/dev/null
-channel "general" "$TALK" "Everything else." >/dev/null
 
+# A fresh server ships with a #general. Move it rather than make a second one.
+# Empty overwrites drop it back to inheriting the category.
+GENERAL=$(api GET "/guilds/$DISCORD_GUILD/channels" \
+    | jq -r 'first(.[] | select(.type == 0 and .name == "general") | .id) // empty')
+if [[ -n $GENERAL ]]; then
+    echo "Moving the existing #general..."
+    api PATCH "/channels/$GENERAL" \
+        "$(jq -nc --arg p "$TALK" '{parent_id: $p, topic: "Everything else.", permission_overwrites: []}')" >/dev/null
+else
+    channel "general" "$TALK" "Everything else." >/dev/null
+fi
+
+# Created bare: Discord refuses to let a bot grant permissions it does not hold
+# itself, so Manage Messages and Manage Threads are ticked by hand afterwards.
 echo "Creating @Maintainer role..."
 api POST "/guilds/$DISCORD_GUILD/roles" \
-    "$(jq -nc --argjson p "$((MANAGE_MSG + MANAGE_THREADS))" \
-        '{name: "Maintainer", permissions: ($p|tostring), hoist: true, mentionable: false}')" \
+    '{"name": "Maintainer", "permissions": "0", "hoist": true, "mentionable": false}' \
     | jq -r '"  role id: \(.id)"'
 
 echo "Creating #announcements webhook..."
 HOOK=$(api POST "/channels/$ANNOUNCE/webhooks" '{"name":"GitHub Releases"}' | jq -r .url)
 
 # 512x512 PNG, the same art as the CurseForge avatar. Needs Manage Guild.
+# The body goes via a file: base64 of the icon overruns the argument limit.
 echo "Setting the server icon..."
 ICON="$HERE/../images/curseforge-avatar.png"
-api PATCH "/guilds/$DISCORD_GUILD" \
-    "$(jq -nc --arg d "data:image/png;base64,$(base64 -w0 "$ICON")" '{icon: $d}')" >/dev/null
+BODY=$(mktemp)
+trap 'rm -f "$BODY"' EXIT
+{ printf '{"icon":"data:image/png;base64,'; base64 -w0 "$ICON"; printf '"}'; } >"$BODY"
+curl -sS -f -X PATCH "${AUTH[@]}" --data-binary @"$BODY" "$API/guilds/$DISCORD_GUILD" >/dev/null
 
 echo
 echo "Done."
