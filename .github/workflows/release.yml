@@ -28,4 +28,6 @@ jobs:
       - name: Post the change notes to Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: .github/discord-release.sh "$GITHUB_REF_NAME"
+        # Invoked through bash: the repo sits on a Windows drive with
+        # core.fileMode off, so the executable bit does not survive a commit.
+        run: bash .github/discord-release.sh "$GITHUB_REF_NAME"
