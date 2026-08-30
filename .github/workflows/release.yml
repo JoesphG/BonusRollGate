@@ -24,3 +24,8 @@ jobs:
           # Wago publishes from the repo webhook, not the packager.
           # WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           # WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+
+      - name: Post the change notes to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: .github/discord-release.sh "$GITHUB_REF_NAME"
