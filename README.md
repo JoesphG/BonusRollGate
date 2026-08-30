@@ -82,11 +82,12 @@ are vendored in `Libs/`, so a clone works as-is with no build step.
 
 Would love any feedback, further ideas or bug reports.
 
-- **Discord:** https://discord.gg/zHT3bGEQ52 — `#support` for bugs and help,
-  `#ideas` for feature requests, `#announcements` for release notes.
-- **Issues:** https://github.com/JoesphG/BonusRollGate/issues/
+Bugs, questions and ideas all go to Discord: **https://discord.gg/zHT3bGEQ52**
 
-Either is fine. A bug report gets fixed faster with:
+`#support` for bugs and help, `#ideas` for feature requests, `#announcements`
+for release notes.
+
+A bug report gets fixed faster with:
 
 ```
 Addon version:      (from /brg status)
