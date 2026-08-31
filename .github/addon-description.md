@@ -4,8 +4,8 @@ API for the description, so both are pasted by hand: CurseForge's Description
 editor with the format set to Markdown not WYSIWYG, and Wago's About tab.
 
 Image URLs are permalinks into this repo, pinned to a commit so they cannot
-break. If CurseForge strips them, re-upload the three PNGs on the project's
-Images tab and swap in the CDN URLs it gives back.
+break. If CurseForge strips them, re-upload the PNGs on the project's Images tab
+and swap in the CDN URLs it gives back.
 -->
 
 **Spend your Voidcores where you meant to.**
@@ -36,7 +36,7 @@ lists every filter currently in force — whole difficulties and boss counts
 together — so you never have to open each tab to find out what is being hidden.
 "Clear every filter" resets the lot behind a confirmation.
 
-![The General tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/General.png)
+![The General tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/cb499841b3907a3a9dabd15f43724903ca3f067f/images/General.png)
 
 ## The Raids tab
 
@@ -46,7 +46,7 @@ individual bosses are. Each list holds only the bosses that difficulty is
 actually offered at, so a one-boss instance run at World, Normal, Heroic and
 Mythic stays off the Looking For Raid list.
 
-![The Raids tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/raids.png)
+![The Raids tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/cb499841b3907a3a9dabd15f43724903ca3f067f/images/raids.png)
 
 ## The Dungeons tab
 
@@ -54,7 +54,22 @@ Mythic+ can be hidden outright or only below a keystone level you pick, so the
 +2 you ran for the weekly stops prompting while your real keys still do. Normal,
 Heroic and Mythic dungeons get plain switches underneath.
 
-![The Dungeons tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/a4bb65f6fb14aae3469456bffad8d870623427de/images/dungeons.png)
+![The Dungeons tab](https://raw.githubusercontent.com/JoesphG/BonusRollGate/cb499841b3907a3a9dabd15f43724903ca3f067f/images/dungeons.png)
+
+## Bringing a roll back
+
+A hidden roll is hidden, not declined. BonusRollGate says so in chat, with the
+command to reopen it:
+
+![The chat announcement when a roll is hidden](https://raw.githubusercontent.com/JoesphG/BonusRollGate/cb499841b3907a3a9dabd15f43724903ca3f067f/images/enable%20roll%20window.png)
+
+`/brg show` puts the prompt back on screen, and you can still spend the Voidcore
+as long as the roll timer has not run out. So a filter you set months ago and
+forgot about costs you nothing: you see the line, you type six characters, the
+window is back.
+
+The announcement is a toggle on the General tab. Turn it off once the filters
+settle down and hidden rolls pass in silence.
 
 ## Commands
 
