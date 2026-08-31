@@ -1,6 +1,7 @@
 <!--
-Source for the CurseForge project description. Paste into the project's
-Description editor with the format set to Markdown, not WYSIWYG.
+Source for the CurseForge and Wago project descriptions. Neither store has an
+API for the description, so both are pasted by hand: CurseForge's Description
+editor with the format set to Markdown not WYSIWYG, and Wago's About tab.
 
 Image URLs are permalinks into this repo, pinned to a commit so they cannot
 break. If CurseForge strips them, re-upload the three PNGs on the project's
@@ -68,9 +69,25 @@ Heroic and Mythic dungeons get plain switches underneath.
 
 ## Support
 
-Questions, ideas and bug reports are all welcome.
+Bugs, questions and ideas all go to Discord: **[discord.gg/zHT3bGEQ52](https://discord.gg/zHT3bGEQ52)**
 
-- Discord: [discord.gg/zHT3bGEQ52](https://discord.gg/zHT3bGEQ52)
-- Source and issues: [github.com/JoesphG/BonusRollGate](https://github.com/JoesphG/BonusRollGate)
+`#support` for bugs and help, `#ideas` for feature requests, `#announcements`
+for release notes.
 
-Descended from BonusRollFilter by Chawan (public domain). MIT licensed.
+A bug report gets fixed faster with:
+
+```
+Addon version:      (from /brg status)
+Game version:       (bottom of the character select screen)
+What I expected:
+What happened:
+Steps to reproduce:
+Lua error (if any):
+```
+
+`/brg status` prints the version and every filter currently in force, which is
+usually the whole diagnosis. If there is a Lua error, paste the full text from
+BugSack rather than the first line.
+
+Source: [github.com/JoesphG/BonusRollGate](https://github.com/JoesphG/BonusRollGate) — MIT licensed.
+Descended from BonusRollFilter by Chawan (public domain).
