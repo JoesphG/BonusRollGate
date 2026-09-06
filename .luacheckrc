@@ -35,7 +35,20 @@ local wow_api = {
 
     -- Settings and misc
     "Settings",
+    "SettingsPanel",
     "time",
+
+    -- Options window
+    "ACCEPT",
+    "CANCEL",
+    "CreateFrame",
+    "GameTooltip",
+    "GetCursorPosition",
+    "HideUIPanel",
+    "NO",
+    "StaticPopup_Show",
+    "UIParent",
+    "YES",
 }
 
 std = "lua51"
@@ -49,6 +62,8 @@ ignore = {
 
 globals = {
     "BRG_Data", -- SavedVariables
+    "StaticPopupDialogs", -- the options window registers its own dialogs
+    "UISpecialFrames", -- appended to, so Escape closes the window
 }
 
 read_globals = wow_api
