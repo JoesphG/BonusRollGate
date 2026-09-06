@@ -1,6 +1,10 @@
--- Stub WoW client + Ace3 so Core.lua runs under plain Lua 5.1. Only the surface
--- the addon touches is emulated. AceDB's ["*"] wildcard defaults are reproduced
--- because the filter relies on them.
+-- Stub WoW client + Ace3 so Core.lua and UI/Model.lua run under plain Lua 5.1.
+-- Only the surface the addon touches is emulated. AceDB's ["*"] wildcard
+-- defaults are reproduced because the filter relies on them.
+--
+-- UI/Widgets.lua and UI/Panel.lua are not loaded: they are frames all the way
+-- down and there is nothing to assert about them without a client. Panel is
+-- stubbed instead, so the tests can still see Core reaching for it.
 
 local H = {}
 
@@ -60,13 +64,6 @@ C_ChallengeMode = {
     end,
     GetActiveKeystoneInfo = function()
         return H.keystoneLevel
-    end,
-}
-
-H.openedCategory = nil
-Settings = {
-    OpenToCategory = function(id)
-        H.openedCategory = id
     end,
 }
 
@@ -300,37 +297,74 @@ libs["AceDB-3.0"] = {
             global = copyDefaults({}, defaults.global),
         }
         db.RegisterCallback = function() end
-        return db
-    end,
-}
 
-H.optionTables = {}
-libs["AceConfigRegistry-3.0"] = {
-    RegisterOptionsTable = function(_, name, t)
-        H.optionTables[name] = (type(t) == "function") and t or function()
-            return t
+        -- Enough of the profile API for the Profiles page to be built and read.
+        local current, names = "Default", { "Default" }
+        function db:GetCurrentProfile()
+            return current
         end
-    end,
-}
-libs["AceConfigDialog-3.0"] = {
-    AddToBlizOptions = function(_, _app, _name, parent)
-        return {}, parent and 42 or 41
-    end,
-}
-libs["AceDBOptions-3.0"] = {
-    GetOptionsTable = function()
-        return { args = {} }
+        function db:GetProfiles()
+            return names
+        end
+        function db:SetProfile(name)
+            for _, existing in ipairs(names) do
+                if existing == name then
+                    current = name
+                    return
+                end
+            end
+            names[#names + 1] = name
+            current = name
+        end
+        function db:CopyProfile(name)
+            H.copiedProfile = name
+        end
+        function db:DeleteProfile(name)
+            H.deletedProfile = name
+        end
+        function db:ResetProfile()
+            H.resetProfile = true
+        end
+
+        return db
     end,
 }
 
 ------------------------------------------------------------------------ driver
 
 function H.load(corePath)
-    local chunk = assert(loadfile(corePath))
-    chunk("BonusRollGate")
+    local ns = {}
+    H.ns = ns
+
+    assert(loadfile(corePath))("BonusRollGate", ns)
+    assert(loadfile("UI/Model.lua"))("BonusRollGate", ns)
+
+    H.panel = { opened = 0, refreshed = 0, registered = 0 }
+    ns.Panel = {
+        Open = function()
+            H.panel.opened = H.panel.opened + 1
+        end,
+        Refresh = function()
+            H.panel.refreshed = H.panel.refreshed + 1
+        end,
+        RegisterSettingsCategory = function()
+            H.panel.registered = H.panel.registered + 1
+        end,
+    }
+
     H.addon:OnInitialize()
     H.addon:OnEnable()
     return H.addon
+end
+
+--- The options page tree, rebuilt from current state.
+function H.model()
+    return H.ns.Model.Build(H.addon)
+end
+
+--- One page by key, or nil.
+function H.page(key)
+    return H.model().byKey[key]
 end
 
 --- Simulate Blizzard raising a bonus roll prompt. Returns true if it stayed up.
@@ -350,8 +384,4 @@ end
 function H.setShown(v)
     shown = v
 end
-function H.options(name)
-    return H.optionTables[name or "BonusRollGate"]()
-end
-
 return H

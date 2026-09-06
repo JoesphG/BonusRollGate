@@ -169,25 +169,37 @@ eq(A.db.global.seenDifficulties[777], true, "unseen difficulty is recorded")
 ok(A.db.global.seenEncounters[4242] ~= nil, "unseen encounter is recorded")
 
 --------------------------------------------------------------------------------
-describe("options tree")
+describe("options pages")
 reset()
-local opts = H.options()
-local function count(t)
-    local n = 0
-    for _ in pairs(t) do
-        n = n + 1
-    end
-    return n
-end
-eq(opts.type, "group", "root is a group")
-ok(opts.args.general ~= nil, "has a General tab")
-ok(opts.args.raids ~= nil, "has a Raids tab")
-ok(opts.args.dungeons ~= nil, "has a Dungeons tab")
-ok(opts.args.other ~= nil, "has an Other content tab")
-eq(count(opts.args.raids.args), 6, "one group per raid difficulty")
-ok(opts.args.raids.args["diff233"] == nil, "Mythic flexible has no group of its own")
 
-local bosses = opts.args.raids.args["diff16"].args.perBoss.args.bosses.values()
+--- First row of the given kind anywhere on a page.
+local function row(pageKey, kind)
+    for _, section in ipairs(H.page(pageKey).sections) do
+        for _, candidate in ipairs(section.rows) do
+            if candidate.kind == kind then
+                return candidate
+            end
+        end
+    end
+end
+
+local model = H.model()
+ok(model.byKey.general ~= nil, "has a General page")
+ok(model.byKey.mythicplus ~= nil, "has a Mythic+ page")
+ok(model.byKey.dungeons ~= nil, "has a Dungeons page")
+ok(model.byKey.other ~= nil, "has an Other content page")
+ok(model.byKey.profiles ~= nil, "has a Profiles page")
+
+local raidPages = 0
+for _, page in ipairs(model.pages) do
+    if page.group == "Raids" then
+        raidPages = raidPages + 1
+    end
+end
+eq(raidPages, 6, "one page per raid difficulty")
+ok(model.byKey.raid233 == nil, "Mythic flexible has no page of its own")
+
+local bosses = row("raid16", "checklist").values()
 for _, id in ipairs(H.encounterIDs) do
     ok(bosses[id] ~= nil, "journal boss " .. id .. " is offered as a choice")
 end
@@ -260,22 +272,28 @@ end
 eq(H.tierWhenLoaded(), 1, "the journal tier is still the player's own")
 
 -- round-trip a boss checkbox through the options handlers
-local bossArg = opts.args.raids.args["diff16"].args.perBoss.args.bosses
-bossArg.set(nil, BOSS.B, true)
-eq(P.difficulty[16].encounters[BOSS.B], true, "options set writes through")
-eq(bossArg.get(nil, BOSS.B), true, "options get reads back")
-bossArg.set(nil, BOSS.B, false)
+local bossRow = row("raid16", "checklist")
+bossRow.set(BOSS.B, true)
+eq(P.difficulty[16].encounters[BOSS.B], true, "the boss list writes through")
+eq(bossRow.get(BOSS.B), true, "and reads back")
+bossRow.set(BOSS.B, false)
 
 --------------------------------------------------------------------------------
-describe("options labels reflect state")
+describe("sidebar badges reflect state")
 reset()
 eq(A:HiddenCount(D.MYTHIC), 0, "no bosses hidden to start")
 P.difficulty[D.MYTHIC].encounters[BOSS.A] = true
 P.difficulty[D.MYTHIC].encounters[BOSS.B] = true
 eq(A:HiddenCount(D.MYTHIC), 2, "counts hidden bosses")
-ok(A:DifficultyLabel(D.MYTHIC):find("(2)", 1, true) ~= nil, "tree label shows the count")
+ok(H.page("raid16").badge():find("2", 1, true) ~= nil, "the badge shows the count")
 P.difficulty[D.LFR].hide = true
-ok(A:DifficultyLabel(D.LFR):find("(all)", 1, true) ~= nil, "tree label marks a whole-difficulty hide")
+ok(H.page("raid17").badge():find("all", 1, true) ~= nil, "and marks a whole-difficulty hide")
+reset()
+eq(H.page("raid16").badge(), "", "no badge while nothing is hidden")
+
+P.mythicPlus.useMinLevel = true
+P.mythicPlus.minLevel = 12
+ok(H.page("mythicplus").badge():find("+12", 1, true) ~= nil, "the Mythic+ badge carries the cutoff")
 ok(A:StatusText():find("Currently hiding") ~= nil, "status lists active filters")
 
 -- a tick for a boss this difficulty does not list must not inflate the count
@@ -308,14 +326,15 @@ eq(P.mythicPlus.hideAll, false, "mythic+ filters cleared")
 --------------------------------------------------------------------------------
 describe("slash commands")
 reset()
-H.printed, H.openedCategory = {}, nil
+eq(H.panel.registered, 1, "the Blizzard AddOns entry was registered at load")
+
+H.printed, H.panel.opened = {}, 0
 A:SlashCommand("")
 ok(#H.printed >= 2, "bare command prints the command list")
-eq(H.openedCategory, 41, "bare command also opens the options panel")
+eq(H.panel.opened, 1, "bare command also opens the options window")
 
-H.openedCategory = nil
 A:SlashCommand("config")
-eq(H.openedCategory, 41, "config opens the settings category")
+eq(H.panel.opened, 2, "config opens the options window")
 
 H.printed = {}
 A:SlashCommand("help")
@@ -323,8 +342,10 @@ ok(#H.printed >= 2, "help lists commands")
 
 reset()
 P.enabled = true
+H.panel.refreshed = 0
 A:SlashCommand("toggle")
 eq(P.enabled, false, "toggle turns filtering off")
+eq(H.panel.refreshed, 1, "and tells an open options window to redraw")
 A:SlashCommand("toggle")
 eq(P.enabled, true, "toggle turns filtering back on")
 
@@ -347,6 +368,22 @@ ok(#H.printed == 1 and H.printed[1]:find("no bonus roll") ~= nil, "hide reports 
 H.printed = {}
 A:SlashCommand("wat")
 ok(H.printed[1]:find("Unknown command") ~= nil, "unknown command is reported")
+
+--------------------------------------------------------------------------------
+describe("profiles page")
+reset()
+local profileList = row("profiles", "list")
+eq(#profileList.values(), 1, "one profile to start")
+eq(profileList.selected(), "Default", "and it is the active one")
+profileList.onSelect("Raiding")
+eq(A.db:GetCurrentProfile(), "Raiding", "picking a name switches to it")
+eq(#profileList.values(), 2, "and the new profile joins the list")
+
+-- Copy and delete list only the profiles that are not the active one.
+local others = H.page("profiles").sections[2].rows[1]
+eq(#others.values(), 1, "copy-from offers every other profile")
+eq(others.values()[1].key, "Default", "which is the one not in use")
+ok(others.confirm("Default"):find("Default", 1, true) ~= nil, "and asks before copying")
 
 --------------------------------------------------------------------------------
 print(("\n%d passed, %d failed"):format(passed, failed))

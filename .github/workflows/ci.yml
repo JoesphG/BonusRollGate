@@ -30,7 +30,9 @@ jobs:
           args: --check .
 
       - name: Test
-        run: lua5.1 tests/run.lua
+        run: |
+          lua5.1 tests/run.lua
+          lua5.1 tests/ui.lua
 
   package:
     name: Package
@@ -65,7 +67,10 @@ jobs:
         run: |
           set -e
           pkg=".release/BonusRollGate"
-          for f in BonusRollGate.toc Core.lua embeds.xml icon.tga Libs/AceAddon-3.0/AceAddon-3.0.lua; do
+          files="BonusRollGate.toc Core.lua embeds.xml icon.tga"
+          files="$files UI/Widgets.lua UI/Model.lua UI/Panel.lua"
+          files="$files Libs/AceAddon-3.0/AceAddon-3.0.lua"
+          for f in $files; do
             test -f "$pkg/$f" || { echo "::error::missing $f in package"; exit 1; }
           done
           for f in .pkgmeta README.md images tests .github; do

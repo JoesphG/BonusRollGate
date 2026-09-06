@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           ACE="https://repos.wowace.com/wow/ace3/trunk"
-          MODULES="AceAddon-3.0 AceConfig-3.0 AceConsole-3.0 AceDB-3.0 AceDBOptions-3.0 AceEvent-3.0 AceGUI-3.0 AceHook-3.0"
+          MODULES="AceAddon-3.0 AceConsole-3.0 AceDB-3.0 AceEvent-3.0 AceHook-3.0"
 
           # --ignore-keywords matters: without it svn expands $Id$ into a
           # revision stamp and every file reads as changed on every run.
@@ -39,8 +39,7 @@ jobs:
             svn export -q --force --ignore-keywords "$ACE/$m" "/tmp/upstream/$m"
           done
 
-          # Upstream carries an empty, commented-out AceConfigDropdown-3.0
-          # folder; drop empty dirs and packaging metadata we never vendor.
+          # Drop empty dirs and packaging metadata we never vendor.
           find /tmp/upstream -type d -empty -delete
           find /tmp/upstream \( -name '.pkgmeta' -o -name '*.toc' \) -delete
           rm -rf /tmp/upstream/*/tests
@@ -78,8 +77,9 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         run: |
           sudo apt-get install -y lua5.1
-          luac5.1 -p Core.lua
+          luac5.1 -p Core.lua UI/Widgets.lua UI/Model.lua UI/Panel.lua
           lua5.1 tests/run.lua
+          lua5.1 tests/ui.lua
 
       - name: Open a pull request
         if: steps.diff.outputs.changed == 'true'

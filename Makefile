@@ -13,6 +13,7 @@ format:
 
 test:
 	lua5.1 tests/run.lua
+	lua5.1 tests/ui.lua
 
 # Build the CurseForge zip locally without uploading anything.
 package:
