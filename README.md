@@ -33,21 +33,21 @@ you might actually take.
 
 The master switch, the chat announcement toggle, and an "At a glance" panel that
 lists every filter currently in force — whole difficulties and boss counts
-together — so you never have to open each tab to find out what is being hidden.
+together — so you never have to open each page to find out what is being hidden.
 "Clear every filter" resets the lot behind a confirmation.
 
-![The General tab](images/General.png)
+![The General page](images/General.png)
 
 ### Raids
 
-Each raid difficulty is its own page. The sidebar doubles as a summary: `(all)`
+Each raid difficulty is its own page. The sidebar doubles as a summary: `all`
 means every roll at that difficulty is hidden, a number means that many
 individual bosses are. Bosses come from the Encounter Journal, and each list
 holds only the bosses that difficulty is actually offered at — so a one-boss
 instance run at World, Normal, Heroic and Mythic stays off the Looking For Raid
 list.
 
-![The Raids tab](images/raids.png)
+![The Raids pages](images/raids.png)
 
 ### Dungeons
 
@@ -55,7 +55,7 @@ Mythic+ can be hidden outright or only below a keystone level you pick, so the
 +2 you ran for the weekly stops prompting while your real keys still do. Normal,
 Heroic and Mythic dungeons get plain switches underneath.
 
-![The Dungeons tab](images/dungeons.png)
+![The Dungeons pages](images/dungeons.png)
 
 ## Commands
 
@@ -75,7 +75,8 @@ Heroic and Mythic dungeons get plain switches underneath.
 
 Download from CurseForge, or clone this repository directly into
 `World of Warcraft/_retail_/Interface/AddOns/BonusRollGate`. The Ace3 libraries
-are vendored in `Libs/`, so a clone works as-is with no build step.
+are vendored in `Libs/`, so a clone works as-is with no build step. The options
+window is hand-written and pulls in no config library.
 
 
 ## Support

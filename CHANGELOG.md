@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0
+
+### Changed
+
+- Rewritten options window: a standalone panel with a sidebar, replacing the
+  Ace3 config dialog.
+- Profiles are managed in the window rather than by AceDBOptions.
+- Blizzard's AddOns list now holds a button that opens the window.
+
+### Removed
+
+- AceConfig-3.0, AceGUI-3.0 and AceDBOptions-3.0 are no longer shipped.
+
 ## 1.1.3
 
 ### Added
