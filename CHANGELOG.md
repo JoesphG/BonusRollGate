@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1
+
+### Fixed
+
+- World bosses have their own per-boss page; the World page used to list the
+  whole raid tier over again.
+- Boss lists read in Encounter Journal order instead of alphabetically.
+
+### Removed
+
+- The World Boss switch under Content types, now that the page covers it.
+
 ## 1.2.0
 
 ### Changed
