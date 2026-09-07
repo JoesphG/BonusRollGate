@@ -142,7 +142,7 @@ local function GeneralPage(addon)
     }
 end
 
-local function RaidPage(addon, difficultyID)
+local function RaidPage(addon, difficultyID, keyPrefix)
     local colored, GOLD, GREY, RED = ns.colored, ns.GOLD, ns.GREY, ns.RED
 
     local function cfg()
@@ -154,7 +154,7 @@ local function RaidPage(addon, difficultyID)
     end
 
     return {
-        key = "raid" .. difficultyID,
+        key = (keyPrefix or "raid") .. difficultyID,
         title = ns.DifficultyName(difficultyID),
         color = ns.DIFFICULTY_COLOR[difficultyID],
         group = "Raids",
@@ -498,6 +498,10 @@ function Model.Build(addon)
     for _, difficultyID in ipairs(ns.RAID_DIFFICULTIES) do
         pages[#pages + 1] = RaidPage(addon, difficultyID)
     end
+
+    -- World bosses take the same per-boss page. They are filed in the journal's
+    -- raid list and drop raid-tier loot, so they sit with the raids.
+    pages[#pages + 1] = RaidPage(addon, ns.DIFF.WORLD_BOSS, "world")
 
     pages[#pages + 1] = MythicPlusPage(addon)
     pages[#pages + 1] =

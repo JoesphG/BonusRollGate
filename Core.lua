@@ -34,7 +34,6 @@ local RAID_DIFFICULTIES = {
     DIFF.RAID_HEROIC,
     DIFF.RAID_MYTHIC,
     DIFF.RAID_STORY,
-    DIFF.RAID_WORLD,
 }
 
 local DUNGEON_DIFFICULTIES = {
@@ -45,11 +44,10 @@ local DUNGEON_DIFFICULTIES = {
 
 local OTHER_DIFFICULTIES = {
     DIFF.DELVE,
-    DIFF.WORLD_BOSS,
 }
 
--- Draws on the journal's world boss pseudo-instance. World (250) does not: real
--- raid instances offer it, so it takes the instanced list.
+-- World Boss (172) gets a per-boss page of its own, drawn from the journal's
+-- world boss pseudo-instance rather than the instanced raid list.
 local WORLD_DIFFICULTIES = {
     [DIFF.WORLD_BOSS] = true,
 }
@@ -63,6 +61,12 @@ for _, list in ipairs({ RAID_DIFFICULTIES, DUNGEON_DIFFICULTIES, OTHER_DIFFICULT
 end
 KNOWN_DIFFICULTIES[DIFF.MYTHIC_PLUS] = true
 KNOWN_DIFFICULTIES[DIFF.RAID_FLEX] = true
+KNOWN_DIFFICULTIES[DIFF.WORLD_BOSS] = true
+
+-- World (250) has no page. The journal answers that real raid instances offer
+-- it, so a page listed the whole tier over again beside Normal and Heroic; and
+-- despite the name it is not where world bosses live. Left unknown, so a roll
+-- at 250 raises a switch under "Seen in play" rather than being unfilterable.
 
 -- The options window is built from these; it knows nothing else about the addon.
 ns.addon = BonusRollGate
@@ -300,7 +304,6 @@ local DIFFICULTY_COLOR = {
     [DIFF.RAID_HEROIC] = "ff0070dd",
     [DIFF.RAID_MYTHIC] = "ffa335ee",
     [DIFF.RAID_STORY] = "ff1eff00",
-    [DIFF.RAID_WORLD] = "ffff8000",
     [DIFF.DUNGEON_NORMAL] = "ffffffff",
     [DIFF.DUNGEON_HEROIC] = "ff0070dd",
     [DIFF.DUNGEON_MYTHIC] = "ffa335ee",

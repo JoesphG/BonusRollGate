@@ -219,14 +219,13 @@ end
 for _, id in ipairs(H.encounterIDs) do
     ok(worldBosses[id] == nil, "raid boss " .. id .. " is not listed under World Boss")
 end
--- World is a difficulty of real raid instances, not of the world boss container
+-- World Boss draws on the pseudo-instance and nothing else
+for _, id in ipairs(H.encounterIDs) do
+    ok(A:GetEncounterChoices(D.WORLD_BOSS)[id] == nil, "instanced boss " .. id .. " is not a world boss")
+end
 ok(
-    A:GetEncounterChoices(D.WORLD_RAID)[H.worldRaidEncounterID] ~= nil,
-    "World Raid lists the instanced boss that offers World"
-)
-ok(
-    A:GetEncounterChoices(D.WORLD_RAID)[H.worldEncounterIDs[1]] == nil,
-    "World Raid does not list the world boss container"
+    A:GetEncounterChoices(D.WORLD_BOSS)[H.worldRaidEncounterID] == nil,
+    "nor is the instanced boss whose raid offers World"
 )
 
 -- a world boss we have actually rolled on must not leak back into the raid list
@@ -242,7 +241,7 @@ ok(A:GetEncounterChoices(D.MYTHIC)[4242] ~= nil, "a boss the journal does not pl
 describe("each difficulty lists only the bosses it is offered at")
 reset()
 local N = H.worldRaidEncounterID
-for _, id in ipairs({ D.WORLD_RAID, D.NORMAL, D.HEROIC, D.MYTHIC }) do
+for _, id in ipairs({ D.NORMAL, D.HEROIC, D.MYTHIC }) do
     ok(A:GetEncounterChoices(id)[N] ~= nil, "Nymrissa is listed at difficulty " .. id)
 end
 ok(A:GetEncounterChoices(D.LFR)[N] == nil, "Nymrissa is not listed at LFR, which her instance does not offer")
@@ -250,14 +249,32 @@ ok(A:GetEncounterChoices(D.STORY)[N] == nil, "nor at Story")
 
 for _, id in ipairs(H.encounterIDs) do
     ok(A:GetEncounterChoices(D.LFR)[id] ~= nil, "the LFR raid still lists boss " .. id)
-    ok(A:GetEncounterChoices(D.WORLD_RAID)[id] == nil, "the LFR raid is not listed at World")
 end
 
 -- filtering is unchanged: the list only decides what gets a checkbox
 reset()
 P.difficulty[D.NORMAL].encounters[N] = true
 ok(not roll({ difficultyID = D.NORMAL, encounterID = N }), "Nymrissa hides on normal")
-ok(roll({ difficultyID = D.WORLD_RAID, encounterID = N }), "and still shows at World until ticked there")
+ok(roll({ difficultyID = D.HEROIC, encounterID = N }), "and still shows on heroic until ticked there")
+
+--------------------------------------------------------------------------------
+describe("World is not a page")
+reset()
+-- The journal answers that real raid instances offer 250, so a page for it
+-- listed the whole tier a second time. It is left unknown instead.
+ok(H.page("raid" .. D.WORLD_RAID) == nil, "World Raid has no page of its own")
+ok(H.page("world" .. D.WORLD_BOSS) ~= nil, "World Boss does")
+
+local contentTypes = H.page("other")
+eq(#contentTypes.sections[1].rows, 1, "Content types is down to one switch")
+eq(contentTypes.sections[1].rows[1].label, "Delves", "and it is Delves")
+
+-- Unknown, so a roll at 250 still becomes filterable rather than being lost.
+roll({ difficultyID = D.WORLD_RAID, encounterID = N })
+eq(A.db.global.seenDifficulties[D.WORLD_RAID], true, "a roll at World is recorded")
+local learned = H.page("other").sections[2]
+eq(learned.hidden(), false, "which raises the Seen in play section")
+ok(learned.rows[2].values()[D.WORLD_RAID] ~= nil, "with a switch for it")
 
 --------------------------------------------------------------------------------
 describe("boss lists cover the current tier only")
