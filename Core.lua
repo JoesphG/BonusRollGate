@@ -149,13 +149,20 @@ local function InstanceDifficulties()
     return answered and valid or nil
 end
 
-local function CollectInstanceEncounters(instanceID, instanceName, into, list)
+local function CollectInstanceEncounters(instanceID, instanceName, into, list, isWorld)
     -- EJ_GetEncounterInfoByIndex only answers for the selected instance.
     if EJ_SelectInstance then
         pcall(EJ_SelectInstance, instanceID)
     end
 
-    local difficulties = InstanceDifficulties()
+    -- World bosses are offered at one difficulty and the pseudo-instance has no
+    -- raid difficulties to report, so the question is not asked for them.
+    -- InstanceDifficulties only tests RAID_DIFFICULTIES, so any answer at all
+    -- would be a map without World Boss in it -- and every world boss would
+    -- then be filtered off its own page. Worse, EJ_SelectInstance is not
+    -- guaranteed to take on a pseudo-instance, so the answer can be the
+    -- previous raid's.
+    local difficulties = not isWorld and InstanceDifficulties() or nil
 
     local j = 1
     while true do
@@ -203,8 +210,8 @@ local function BuildEncounterList()
                 break
             end
 
-            local bucket = IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName) and list.world or list.raid
-            CollectInstanceEncounters(instanceID, instanceName, bucket, list)
+            local isWorld = IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName)
+            CollectInstanceEncounters(instanceID, instanceName, isWorld and list.world or list.raid, list, isWorld)
 
             i = i + 1
         end

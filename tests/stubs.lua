@@ -100,11 +100,21 @@ local ejTiers = {
                 },
             },
             {
+                -- The expansion's world bosses, filed under a pseudo-instance
+                -- named after the tier. Several of them, as in the live
+                -- journal, and the journal answers that it offers Normal raid
+                -- -- the same misinformation that had real raids claiming to
+                -- offer World. Asking it about difficulties at all used to
+                -- filter every world boss off its own page.
                 id = 1301,
                 name = "Midnight",
                 areaMapID = 0,
+                difficulties = { 14 },
                 bosses = {
-                    { "Dread Herald Vashj", 2950 },
+                    { "Lu'ashal", 2950 },
+                    { "Thorm'belan", 2951 },
+                    { "Predaxas", 2952 },
+                    { "Cragpine", 2953 },
                 },
             },
         },
@@ -199,7 +209,7 @@ end
 
 H.encounterIDs = { 2900, 2901, 2902 }
 H.worldRaidEncounterID = 2960
-H.worldEncounterIDs = { 2950 }
+H.worldEncounterIDs = { 2950, 2951, 2952, 2953 }
 H.previousTierEncounterIDs = { 2800 }
 H.tierWhenLoaded = function()
     return EJ_TIER

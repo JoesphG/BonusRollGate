@@ -265,6 +265,20 @@ reset()
 ok(H.page("raid" .. D.WORLD_RAID) == nil, "World Raid has no page of its own")
 ok(H.page("world" .. D.WORLD_BOSS) ~= nil, "World Boss does")
 
+-- The journal claims the pseudo-instance offers Normal raid. Asking it about
+-- difficulties at all used to filter every world boss off this page.
+local worldList
+for _, section in ipairs(H.page("world" .. D.WORLD_BOSS).sections) do
+    for _, candidate in ipairs(section.rows) do
+        if candidate.kind == "checklist" then
+            worldList = candidate
+        end
+    end
+end
+for _, id in ipairs(H.worldEncounterIDs) do
+    ok(worldList.values()[id] ~= nil, "the page offers world boss " .. id)
+end
+
 local contentTypes = H.page("other")
 eq(#contentTypes.sections[1].rows, 1, "Content types is down to one switch")
 eq(contentTypes.sections[1].rows[1].label, "Delves", "and it is Delves")
