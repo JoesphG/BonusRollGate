@@ -187,7 +187,9 @@ local model = H.model()
 ok(model.byKey.general ~= nil, "has a General page")
 ok(model.byKey.mythicplus ~= nil, "has a Mythic+ page")
 ok(model.byKey.dungeons ~= nil, "has a Dungeons page")
-ok(model.byKey.other ~= nil, "has an Other content page")
+ok(model.byKey.delves ~= nil, "has a Delves page")
+ok(model.byKey.seen ~= nil, "has a Seen in play page")
+ok(model.byKey.other == nil, "and no Content types page, now that Delves stands alone")
 ok(model.byKey.profiles ~= nil, "has a Profiles page")
 
 local raidPages = 0
@@ -258,12 +260,12 @@ ok(not roll({ difficultyID = D.NORMAL, encounterID = N }), "Nymrissa hides on no
 ok(roll({ difficultyID = D.HEROIC, encounterID = N }), "and still shows on heroic until ticked there")
 
 --------------------------------------------------------------------------------
-describe("World is not a page")
+describe("World is not a page, World Bosses is")
 reset()
 -- The journal answers that real raid instances offer 250, so a page for it
 -- listed the whole tier a second time. It is left unknown instead.
 ok(H.page("raid" .. D.WORLD_RAID) == nil, "World Raid has no page of its own")
-ok(H.page("world" .. D.WORLD_BOSS) ~= nil, "World Boss does")
+eq(H.page("world" .. D.WORLD_BOSS).title, "World Bosses", "World Bosses does, and is named in the plural")
 
 -- The journal claims the pseudo-instance offers Normal raid. Asking it about
 -- difficulties at all used to filter every world boss off this page.
@@ -279,16 +281,23 @@ for _, id in ipairs(H.worldEncounterIDs) do
     ok(worldList.values()[id] ~= nil, "the page offers world boss " .. id)
 end
 
-local contentTypes = H.page("other")
-eq(#contentTypes.sections[1].rows, 1, "Content types is down to one switch")
-eq(contentTypes.sections[1].rows[1].label, "Delves", "and it is Delves")
+local delves = H.page("delves")
+eq(#delves.sections[1].rows, 1, "Delves carries one switch")
+eq(delves.sections[1].rows[1].label, "Delves", "and it is its own")
 
 -- Unknown, so a roll at 250 still becomes filterable rather than being lost.
+-- Earlier tests have already met unknown difficulties, so clear the record to
+-- see the empty state.
+local recorded = A.db.global.seenDifficulties
+A.db.global.seenDifficulties = {}
+ok(H.page("seen").hidden(), "Seen in play stays out of the sidebar while there is nothing to show")
+A.db.global.seenDifficulties = recorded
+
 roll({ difficultyID = D.WORLD_RAID, encounterID = N })
 eq(A.db.global.seenDifficulties[D.WORLD_RAID], true, "a roll at World is recorded")
-local learned = H.page("other").sections[2]
-eq(learned.hidden(), false, "which raises the Seen in play section")
-ok(learned.rows[2].values()[D.WORLD_RAID] ~= nil, "with a switch for it")
+local learned = H.page("seen")
+eq(learned.hidden(), false, "which brings the page out")
+ok(learned.sections[1].rows[2].values()[D.WORLD_RAID] ~= nil, "with a switch for it")
 
 --------------------------------------------------------------------------------
 describe("boss lists read in pull order")

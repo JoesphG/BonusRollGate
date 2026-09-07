@@ -37,6 +37,7 @@ local model
 local window, sidebar, scroll
 local currentKey
 local sidebarButtons = {}
+local sidebarEntries = {}
 local pages = {}
 
 --------------------------------------------------------------------------------
@@ -380,6 +381,12 @@ local BUILDERS = {
 -- Pages
 --------------------------------------------------------------------------------
 
+-- A page can withdraw from the sidebar entirely: "Seen in play" has nothing to
+-- show until the addon meets a difficulty it ships no switch for.
+local function PageHidden(page)
+    return page.hidden ~= nil and page.hidden()
+end
+
 local function BuildPage(page)
     local frame = CreateFrame("Frame", nil, scroll.content)
     frame:SetPoint("TOPLEFT")
@@ -431,6 +438,11 @@ local function LayoutPage(key)
 end
 
 local function ShowPage(key)
+    local page = model.byKey[key]
+    if not page or PageHidden(page) then
+        key = model.pages[1].key
+    end
+
     if not pages[key] then
         pages[key] = BuildPage(model.byKey[key])
     end
@@ -454,37 +466,72 @@ end
 --------------------------------------------------------------------------------
 
 local function BuildSidebar()
-    local y = 8
     local group
 
     for _, page in ipairs(model.pages) do
         if page.group ~= group then
             group = page.group
             if group then
-                local header = UI.SidebarHeader(sidebar, group)
-                header:SetPoint("TOPLEFT", 0, -y)
-                header:SetPoint("TOPRIGHT", 0, -y)
-                y = y + header.height
+                sidebarEntries[#sidebarEntries + 1] = { kind = "header", widget = UI.SidebarHeader(sidebar, group) }
             end
         end
 
         local button = UI.SidebarButton(sidebar)
-        button:SetPoint("TOPLEFT", 0, -y)
-        button:SetPoint("TOPRIGHT", 0, -y)
         button.label:SetText(page.color and ns.colored(page.title, page.color) or page.title)
         button:SetScript("OnClick", function()
             ShowPage(page.key)
         end)
         sidebarButtons[page.key] = button
-        y = y + button.height
+        sidebarEntries[#sidebarEntries + 1] = { kind = "page", widget = button, page = page }
+    end
+end
+
+-- A header belongs to the pages beneath it: it goes when they all do.
+local function HeaderWanted(index)
+    for i = index + 1, #sidebarEntries do
+        local entry = sidebarEntries[i]
+        if entry.kind == "header" then
+            return false
+        end
+        if not PageHidden(entry.page) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Re-run on every refresh, so a page that arrives mid-session takes its place
+-- without the rest of the sidebar being rebuilt.
+local function LayoutSidebar()
+    local y = 8
+    for index, entry in ipairs(sidebarEntries) do
+        local visible
+        if entry.kind == "header" then
+            visible = HeaderWanted(index)
+        else
+            visible = not PageHidden(entry.page)
+        end
+
+        if visible then
+            entry.widget:Show()
+            entry.widget:ClearAllPoints()
+            entry.widget:SetPoint("TOPLEFT", 0, -y)
+            entry.widget:SetPoint("TOPRIGHT", 0, -y)
+            y = y + entry.widget.height
+        else
+            entry.widget:Hide()
+        end
     end
 end
 
 local function RefreshSidebar()
-    for _, page in ipairs(model.pages) do
-        local button = sidebarButtons[page.key]
-        button.badge:SetText(page.badge and page.badge() or "")
+    for _, entry in ipairs(sidebarEntries) do
+        if entry.kind == "page" then
+            local page = entry.page
+            sidebarButtons[page.key].badge:SetText(page.badge and page.badge() or "")
+        end
     end
+    LayoutSidebar()
 end
 
 --------------------------------------------------------------------------------

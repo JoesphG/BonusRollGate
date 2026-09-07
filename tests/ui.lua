@@ -51,7 +51,7 @@ end)
 ok(ns.Panel.IsShown(), "and reports itself shown")
 
 local pages = ns.Model.Build(addon).pages
-ok(#pages == 11, "eleven pages: General, five raid difficulties, World Boss, two dungeon, Other, Profiles")
+ok(#pages == 12, "twelve pages: General, five raid, World Bosses, two dungeon, Delves, Seen in play, Profiles")
 
 -- Twice over: the first pass builds each page, the second re-lays it out, which
 -- is where a pooled row that failed to reset would show up.
@@ -73,7 +73,7 @@ addon.db.profile.difficulty[14].encounters[2900] = true
 addon.db.global.seenDifficulties[777] = true
 addon.db.profile.mythicPlus.useMinLevel = true
 
-for _, key in ipairs({ "raid16", "raid14", "world172", "other", "mythicplus", "general" }) do
+for _, key in ipairs({ "raid16", "raid14", "world172", "delves", "seen", "mythicplus", "general" }) do
     attempt(key .. " redraws with filters set", function()
         ns.Panel.ShowPage(key)
         ns.Panel.Refresh()

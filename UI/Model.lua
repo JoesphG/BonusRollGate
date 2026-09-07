@@ -142,7 +142,7 @@ local function GeneralPage(addon)
     }
 end
 
-local function RaidPage(addon, difficultyID, keyPrefix)
+local function RaidPage(addon, difficultyID, keyPrefix, title)
     local colored, GOLD, GREY, RED = ns.colored, ns.GOLD, ns.GREY, ns.RED
 
     local function cfg()
@@ -155,7 +155,7 @@ local function RaidPage(addon, difficultyID, keyPrefix)
 
     return {
         key = (keyPrefix or "raid") .. difficultyID,
-        title = ns.DifficultyName(difficultyID),
+        title = title or ns.DifficultyName(difficultyID),
         color = ns.DIFFICULTY_COLOR[difficultyID],
         group = "Raids",
         difficultyID = difficultyID,
@@ -351,8 +351,8 @@ end
 
 -- Difficulties the addon has been offered a roll on that it ships no switch
 -- for. A checklist rather than a row each, so one met mid-session appears
--- without a reload; the section hides itself while there are none.
-local function SeenInPlaySection(addon)
+-- without a reload; the page hides itself while there are none.
+local function SeenInPlayPage(addon)
     local function seen()
         local values = {}
         for difficultyID in pairs(addon.db.global.seenDifficulties) do
@@ -363,24 +363,45 @@ local function SeenInPlaySection(addon)
         return values
     end
 
+    local function empty()
+        return next(seen()) == nil
+    end
+
     return {
+        key = "seen",
         title = "Seen in play",
-        hidden = function()
-            return next(seen()) == nil
+        group = "Other",
+        hidden = empty,
+        badge = function()
+            local n = 0
+            for difficultyID in pairs(seen()) do
+                if addon.db.profile.difficulty[difficultyID].hide then
+                    n = n + 1
+                end
+            end
+            return n > 0 and ns.colored(tostring(n), ns.GOLD) or ""
         end,
-        rows = {
-            Text(function()
-                return ns.colored("Difficulties BonusRollGate has met that it did not ship a switch for.", ns.GREY)
-            end),
+        sections = {
             {
-                kind = "checklist",
-                values = seen,
-                get = function(difficultyID)
-                    return addon.db.profile.difficulty[difficultyID].hide
-                end,
-                set = function(difficultyID, value)
-                    addon.db.profile.difficulty[difficultyID].hide = value
-                end,
+                title = "Hide bonus rolls from",
+                rows = {
+                    Text(function()
+                        return ns.colored(
+                            "Difficulties BonusRollGate has met that it did not ship a switch for.",
+                            ns.GREY
+                        )
+                    end),
+                    {
+                        kind = "checklist",
+                        values = seen,
+                        get = function(difficultyID)
+                            return addon.db.profile.difficulty[difficultyID].hide
+                        end,
+                        set = function(difficultyID, value)
+                            addon.db.profile.difficulty[difficultyID].hide = value
+                        end,
+                    },
+                },
             },
         },
     }
@@ -506,15 +527,16 @@ function Model.Build(addon)
 
     -- World bosses take the same per-boss page. They are filed in the journal's
     -- raid list and drop raid-tier loot, so they sit with the raids.
-    pages[#pages + 1] = RaidPage(addon, ns.DIFF.WORLD_BOSS, "world")
+    pages[#pages + 1] = RaidPage(addon, ns.DIFF.WORLD_BOSS, "world", "World Bosses")
 
     pages[#pages + 1] = MythicPlusPage(addon)
     pages[#pages + 1] =
         ListPage(addon, "dungeons", "Other difficulties", "Dungeons", ns.DUNGEON_DIFFICULTIES, "Hide bonus rolls from")
 
-    local other = ListPage(addon, "other", "Content types", "Other", ns.OTHER_DIFFICULTIES, "Hide bonus rolls from")
-    other.sections[#other.sections + 1] = SeenInPlaySection(addon)
-    pages[#pages + 1] = other
+    -- Delves are the only content type left with a switch of their own, so they
+    -- are a sidebar item rather than a "Content types" page holding one row.
+    pages[#pages + 1] = ListPage(addon, "delves", "Delves", "Other", ns.OTHER_DIFFICULTIES, "Hide bonus rolls from")
+    pages[#pages + 1] = SeenInPlayPage(addon)
 
     pages[#pages + 1] = ProfilesPage(addon)
 
