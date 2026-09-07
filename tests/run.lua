@@ -385,6 +385,15 @@ eq(#others.values(), 1, "copy-from offers every other profile")
 eq(others.values()[1].key, "Default", "which is the one not in use")
 ok(others.confirm("Default"):find("Default", 1, true) ~= nil, "and asks before copying")
 
+-- AceDB r35 raises on these rather than returning, so they never reach it.
+local Name = H.ns.NormalizeProfileName
+eq(Name("  Raiding  "), "Raiding", "a typed name is trimmed")
+eq(Name(""), nil, "an empty name is refused")
+eq(Name("   "), nil, "so is one of only spaces")
+eq(Name(nil), nil, "and so is nothing at all")
+eq(Name(string.rep("x", 50)), string.rep("x", 50), "50 characters is allowed")
+eq(Name(string.rep("x", 51)), nil, "51 is not")
+
 --------------------------------------------------------------------------------
 print(("\n%d passed, %d failed"):format(passed, failed))
 os.exit(failed == 0 and 0 or 1)

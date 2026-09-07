@@ -13,6 +13,30 @@ local Model = {}
 ns.Model = Model
 
 --------------------------------------------------------------------------------
+-- Profile names
+--
+-- AceDB r35 raises on a name that is blank, all spaces, or over 50 characters.
+-- The panel is the only thing that hands it typed text, so it trims and checks
+-- first: a bad name is refused quietly rather than thrown as a Lua error.
+--------------------------------------------------------------------------------
+
+local MAX_PROFILE_NAME = 50
+
+-- Counted the way AceDB counts, or a 20-character Cyrillic name would measure
+-- 40 bytes and be refused for a length it does not have. Falls back to bytes
+-- outside the client, where the tests only use ASCII.
+local NameLength = strlenutf8 or string.len
+
+--- The name AceDB should be given, or nil if it would refuse it.
+function ns.NormalizeProfileName(text)
+    local name = tostring(text or ""):match("^%s*(.-)%s*$")
+    if name == "" or NameLength(name) > MAX_PROFILE_NAME then
+        return nil
+    end
+    return name
+end
+
+--------------------------------------------------------------------------------
 -- Row constructors
 --------------------------------------------------------------------------------
 

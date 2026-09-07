@@ -47,6 +47,7 @@ local wow_api = {
     "HideUIPanel",
     "NO",
     "StaticPopup_Show",
+    "strlenutf8",
     "UIParent",
     "YES",
 }

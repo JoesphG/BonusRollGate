@@ -58,9 +58,9 @@ StaticPopupDialogs["BONUSROLLGATE_CONFIRM"] = {
     end,
 }
 
-local function CreateProfile(name)
-    name = (name or ""):match("^%s*(.-)%s*$")
-    if name ~= "" then
+local function CreateProfile(text)
+    local name = ns.NormalizeProfileName(text)
+    if name then
         -- A name AceDB has not seen creates an empty profile, which it then
         -- fills from the defaults. No copy of the current one.
         addon.db:SetProfile(name)
