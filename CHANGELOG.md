@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.2
+
+### Fixed
+
+- World bosses were filtered off their own page; all of them now list.
+
+### Changed
+
+- Delves is a sidebar item of its own, and Seen in play is a page rather
+  than a section riding on it.
+
 ## 1.2.1
 
 ### Fixed

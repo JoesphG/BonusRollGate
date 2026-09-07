@@ -2,7 +2,7 @@
 ## Title: BonusRollGate
 ## Notes: Hides the bonus roll prompt for the bosses, difficulties and content types you choose.
 ## Author: JoesphG
-## Version: 1.2.1
+## Version: 1.2.2
 ## SavedVariables: BRG_Data
 ## X-Curse-Project-ID: 1668946
 ## X-Wago-ID: 5NR8O5K3
