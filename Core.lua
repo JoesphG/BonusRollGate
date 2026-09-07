@@ -117,7 +117,8 @@ local function DifficultyName(difficultyID)
     return ("Difficulty %d"):format(difficultyID)
 end
 
--- Current-tier bosses, split into `raid` and `world`. Cached for the session.
+-- Current-tier bosses, split into `raid` and `world`, with the journal's own
+-- order recorded so the boss lists read in pull order. Cached for the session.
 local encounterCache
 
 -- The world boss container has no instance map. Falls back to its habit of
@@ -148,7 +149,7 @@ local function InstanceDifficulties()
     return answered and valid or nil
 end
 
-local function CollectInstanceEncounters(instanceID, instanceName, into, validAt)
+local function CollectInstanceEncounters(instanceID, instanceName, into, list)
     -- EJ_GetEncounterInfoByIndex only answers for the selected instance.
     if EJ_SelectInstance then
         pcall(EJ_SelectInstance, instanceID)
@@ -165,14 +166,18 @@ local function CollectInstanceEncounters(instanceID, instanceName, into, validAt
         if encounterName and not into[encounterID] then
             into[encounterID] = instanceName and ("%s |cff808080(%s)|r"):format(encounterName, instanceName)
                 or encounterName
-            validAt[encounterID] = difficulties
+            list.validAt[encounterID] = difficulties
+            -- One counter across the whole walk: instances in journal order,
+            -- bosses in pull order within each.
+            list.n = list.n + 1
+            list.order[encounterID] = list.n
         end
         j = j + 1
     end
 end
 
 local function BuildEncounterList()
-    local list = { raid = {}, world = {}, validAt = {} }
+    local list = { raid = {}, world = {}, validAt = {}, order = {}, n = 0 }
 
     if not (EJ_GetNumTiers and EJ_GetInstanceByIndex and EJ_GetEncounterInfoByIndex) then
         return list
@@ -199,7 +204,7 @@ local function BuildEncounterList()
             end
 
             local bucket = IsWorldBossInstance(instanceName, dungeonAreaMapID, tierName) and list.world or list.raid
-            CollectInstanceEncounters(instanceID, instanceName, bucket, list.validAt)
+            CollectInstanceEncounters(instanceID, instanceName, bucket, list)
 
             i = i + 1
         end
@@ -253,6 +258,12 @@ function BonusRollGate:GetEncounterChoices(difficultyID)
     end
 
     return choices
+end
+
+--- Where a boss sits in the Encounter Journal. Bosses the journal does not
+--- place at all sort after the ones it does.
+function BonusRollGate:EncounterOrder(encounterID)
+    return GetEncounterList().order[encounterID] or math.huge
 end
 
 function BonusRollGate:GetKeystoneLevel()

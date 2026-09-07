@@ -245,7 +245,7 @@ end
 -- Sorted entries for a values() result. Checklists hand back a id -> name map,
 -- lists hand back an array of { key, label }; which one is a property of the
 -- block, never inferred from the data -- a map keyed by 1 would read as an array.
-local function Entries(values, isArray)
+local function Entries(values, isArray, rank)
     local list = {}
     if isArray then
         for _, entry in ipairs(values) do
@@ -256,7 +256,15 @@ local function Entries(values, isArray)
             list[#list + 1] = { key = key, label = label }
         end
     end
+    -- `rank` orders a boss list the way the Encounter Journal does; the label
+    -- breaks ties and orders everything else.
     table.sort(list, function(a, b)
+        if rank then
+            local ra, rb = rank(a.key), rank(b.key)
+            if ra ~= rb then
+                return ra < rb
+            end
+        end
         return tostring(a.label) < tostring(b.label)
     end)
     return list
@@ -279,7 +287,7 @@ local function PooledBlock(parent, section, row, isArray, make, configure)
         holder:ClearAllPoints()
         holder:SetPoint("TOPLEFT", 0, -y)
 
-        local entries = Entries(row.values(), isArray)
+        local entries = Entries(row.values(), isArray, row.rank)
         local disabled = Disabled(section, row)
 
         if #entries == 0 then

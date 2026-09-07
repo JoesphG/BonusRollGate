@@ -277,6 +277,31 @@ eq(learned.hidden(), false, "which raises the Seen in play section")
 ok(learned.rows[2].values()[D.WORLD_RAID] ~= nil, "with a switch for it")
 
 --------------------------------------------------------------------------------
+describe("boss lists read in pull order")
+reset()
+local bossList = row("raid14", "checklist")
+ok(bossList.rank ~= nil, "the boss list carries the journal's order")
+
+local ids = {}
+for id in pairs(bossList.values()) do
+    ids[#ids + 1] = id
+end
+table.sort(ids, function(a, b)
+    return bossList.rank(a) < bossList.rank(b)
+end)
+
+local names = {}
+for _, id in ipairs(ids) do
+    names[#names + 1] = bossList.values()[id]:match("^[^|]+"):gsub("%s+$", "")
+end
+eq(names[1], "Warden Kaelis", "first boss of the first raid comes first")
+eq(names[2], "The Hollow Choir", "then the second")
+eq(names[3], "Nal'thelun", "then the third -- alphabetical would have put it first")
+eq(names[4], "Nymrissa Wavecaller", "and the next instance follows")
+
+eq(A:EncounterOrder(4242), math.huge, "a boss the journal never placed sorts last")
+
+--------------------------------------------------------------------------------
 describe("boss lists cover the current tier only")
 reset()
 for _, id in ipairs(H.previousTierEncounterIDs) do

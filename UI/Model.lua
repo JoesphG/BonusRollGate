@@ -219,6 +219,11 @@ local function RaidPage(addon, difficultyID, keyPrefix)
                         kind = "checklist",
                         disabled = everythingHidden,
                         empty = "The Encounter Journal lists no bosses at this difficulty.",
+                        -- Pull order, not alphabetical: a raid list reads the
+                        -- way the instance is run.
+                        rank = function(encounterID)
+                            return addon:EncounterOrder(encounterID)
+                        end,
                         values = function()
                             return addon:GetEncounterChoices(difficultyID)
                         end,
