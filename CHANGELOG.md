@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.3
+
+### Added
+
+- Prey hunts get a switch of their own, covering all three hunt difficulties.
+- `/brg last` describes the last roll the addon saw.
+
 ## 1.2.2
 
 ### Fixed
