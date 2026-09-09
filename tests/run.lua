@@ -159,12 +159,27 @@ H.now = realNow
 describe("prey hunts")
 reset()
 H.zone = H.outdoorZone
-ok(roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "a prey roll shows by default")
+
+-- A live prey prompt: Normal raid difficulty, no encounter, standing outdoors.
+local function preyRoll()
+    return roll({ difficultyID = D.NORMAL, encounterID = nil, instanceID = 0 })
+end
+
+ok(preyRoll(), "a prey roll shows by default")
 P.prey.hideAll = true
-ok(not roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "and is hidden once prey is switched off")
+ok(not preyRoll(), "and is hidden once prey is switched off")
+
+-- Outdoors as well, but the journal names it, so it belongs to its own page.
+ok(
+    roll({ difficultyID = D.WORLD_BOSS, encounterID = H.worldEncounterIDs[1], instanceID = 0 }),
+    "a world boss is left alone"
+)
 
 H.zone = H.defaultZone
-ok(roll({ difficultyID = D.MYTHIC, encounterID = BOSS.B, instanceID = 0 }), "a raid boss is left alone")
+ok(
+    roll({ difficultyID = D.NORMAL, encounterID = BOSS.B, instanceID = 0 }),
+    "so is a Normal raid boss, which reports the same difficulty"
+)
 ok(roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "and so is a prompt that lost its fields in a raid")
 
 --------------------------------------------------------------------------------

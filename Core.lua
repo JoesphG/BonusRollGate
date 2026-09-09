@@ -536,17 +536,16 @@ function BonusRollGate:CaptureRollInfo(frame)
     return info
 end
 
--- Prey hunts are quests out in the world: the prompt carries no difficulty and
--- no encounter, and the hunt's own Normal/Hard/Nightmare tier lives on the
--- quest, which the frame never sees. So the test is "a roll from outdoors that
--- the client will not place", and one switch covers all three tiers.
+-- Prey hunts are quests out in the world, and the hunt's own Normal/Hard/
+-- Nightmare tier lives on the quest, which the frame never sees. So one switch
+-- covers all three tiers.
 --
--- The zone is half the test because a raid prompt re-issued after a loading
--- screen also arrives without a difficulty.
-local function IsUnplacedOutdoorRoll(info)
-    if info.difficultyID and info.difficultyID ~= 0 then
-        return false
-    end
+-- The difficulty cannot be the test: a prey prompt reports Normal raid (14),
+-- the same as a real raid boss. What it has no answer for is the encounter, and
+-- GetInstanceInfo puts the player outdoors -- "Eastern Kingdoms", type "none",
+-- map 0. A Normal raid roll carries an encounter and stands in a raid, and a
+-- world boss is outdoors but named in the journal, so the pair separates them.
+local function IsPreyRoll(info)
     if info.encounterID and info.encounterID ~= 0 then
         return false
     end
@@ -564,7 +563,7 @@ function BonusRollGate:ShouldHide(info)
         difficultyID = DIFF.RAID_MYTHIC
     end
 
-    if profile.prey.hideAll and IsUnplacedOutdoorRoll(info) then
+    if profile.prey.hideAll and IsPreyRoll(info) then
         return true
     end
 
