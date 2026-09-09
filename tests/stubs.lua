@@ -49,7 +49,8 @@ end
 -- Where the player is standing when a roll arrives.
 H.defaultZone =
     { name = "Voidscar Bastion", instanceType = "raid", difficultyID = 16, difficultyName = "Mythic", uiMapID = 2500 }
-H.outdoorZone = { name = "Harandar", instanceType = "none", difficultyID = 0, difficultyName = "", uiMapID = 2371 }
+-- What the client reports during a prey hunt: no instance, no map.
+H.outdoorZone = { name = "Eastern Kingdoms", instanceType = "none", difficultyID = 0, difficultyName = "", uiMapID = 0 }
 H.zone = H.defaultZone
 function GetInstanceInfo()
     local z = H.zone
@@ -393,6 +394,11 @@ end
 --- Simulate Blizzard raising a bonus roll prompt. Returns true if it stayed up.
 function H.roll(fields)
     shown = true
+    -- A fresh prompt, not the last one with a few fields written over: a field
+    -- the client leaves blank has to arrive blank.
+    for _, key in ipairs({ "spellID", "difficultyID", "encounterID", "instanceID" }) do
+        BonusRollFrame[key] = nil
+    end
     for k, v in pairs(fields) do
         BonusRollFrame[k] = v
     end
