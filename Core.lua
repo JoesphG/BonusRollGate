@@ -469,6 +469,24 @@ function BonusRollGate:OnUserAction()
     self.userAction = true
 end
 
+-- Where the player was standing. The frame carries nothing for content the
+-- Encounter Journal does not file, so for such a roll this is the only
+-- description of it there is.
+local function CurrentZone()
+    if not GetInstanceInfo then
+        return nil
+    end
+
+    local name, instanceType, difficultyID, difficultyName, _, _, _, uiMapID = GetInstanceInfo()
+    return {
+        name = name,
+        instanceType = instanceType,
+        difficultyID = difficultyID,
+        difficultyName = difficultyName,
+        uiMapID = uiMapID,
+    }
+end
+
 -- Reads the roll off the frame, filling blanks from the first sighting of the
 -- same spell: a prompt re-issued after a loading screen loses its instance data.
 function BonusRollGate:CaptureRollInfo(frame)
@@ -495,6 +513,7 @@ function BonusRollGate:CaptureRollInfo(frame)
         difficultyID = difficultyID,
         encounterID = encounterID,
         instanceID = instanceID,
+        zone = CurrentZone() or (cached and cached.zone),
     }
 
     if spellID then
@@ -619,6 +638,7 @@ function BonusRollGate:PrintCommands()
     self:Print("  " .. cmd("/brg hide") .. "    hide the bonus roll showing right now")
     self:Print("  " .. cmd("/brg toggle") .. "  turn filtering on or off")
     self:Print("  " .. cmd("/brg status") .. "  list what is currently filtered")
+    self:Print("  " .. cmd("/brg last") .. "    describe the last roll the addon saw")
     self:Print("  " .. cmd("/bonusrollgate") .. " works anywhere /brg does")
     self:Print("Support: " .. cmd("https://discord.gg/zHT3bGEQ52"))
 end
@@ -642,6 +662,41 @@ function BonusRollGate:PrintStatus()
     end
 end
 
+--- /brg last: everything the client said about the most recent prompt. A roll
+--- the addon cannot place carries no difficulty to switch off, and this is the
+--- only way to see what it did carry.
+function BonusRollGate:PrintLastRoll()
+    local info = self.currentRoll
+    if not info then
+        self:Print("No bonus roll seen this session.")
+        return
+    end
+
+    self:Print("Last bonus roll:")
+    self:Print(
+        ("  spell %s, difficulty %s (%s), encounter %s, instance %s"):format(
+            tostring(info.spellID),
+            tostring(info.difficultyID),
+            DifficultyName(info.difficultyID or 0),
+            tostring(info.encounterID),
+            tostring(info.instanceID)
+        )
+    )
+
+    local zone = info.zone
+    if zone then
+        self:Print(
+            ("  zone %s (%s), zone difficulty %s (%s), map %s"):format(
+                tostring(zone.name),
+                tostring(zone.instanceType),
+                tostring(zone.difficultyID),
+                tostring(zone.difficultyName),
+                tostring(zone.uiMapID)
+            )
+        )
+    end
+end
+
 function BonusRollGate:SlashCommand(input)
     local command = (input or ""):lower():match("^%s*(.-)%s*$")
 
@@ -661,6 +716,8 @@ function BonusRollGate:SlashCommand(input)
         self:RefreshOptions()
     elseif command == "status" then
         self:PrintStatus()
+    elseif command == "last" then
+        self:PrintLastRoll()
     elseif command == "help" or command == "?" then
         self:PrintCommands()
     else

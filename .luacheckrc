@@ -27,6 +27,9 @@ local wow_api = {
     -- Mythic+
     "C_ChallengeMode",
 
+    -- Zone
+    "GetInstanceInfo",
+
     -- Bonus roll UI
     "BonusRollFrame",
     "GroupLootContainer",

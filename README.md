@@ -67,6 +67,7 @@ Heroic and Mythic dungeons get plain switches underneath.
 | `/brg hide` | Hide the bonus roll showing right now |
 | `/brg toggle` | Turn filtering on or off |
 | `/brg status` | List what is currently filtered |
+| `/brg last` | Describe the last roll the addon saw |
 | `/brg help` | List these commands |
 
 `/bonusrollgate` works anywhere `/brg` does.

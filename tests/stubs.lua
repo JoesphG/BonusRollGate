@@ -46,6 +46,19 @@ function GetDifficultyInfo(id)
     return difficultyNames[id]
 end
 
+-- Where the player is standing when a roll arrives.
+H.defaultZone =
+    { name = "Voidscar Bastion", instanceType = "raid", difficultyID = 16, difficultyName = "Mythic", uiMapID = 2500 }
+H.outdoorZone = { name = "Harandar", instanceType = "none", difficultyID = 0, difficultyName = "", uiMapID = 2371 }
+H.zone = H.defaultZone
+function GetInstanceInfo()
+    local z = H.zone
+    if not z then
+        return nil
+    end
+    return z.name, z.instanceType, z.difficultyID, z.difficultyName, nil, nil, nil, z.uiMapID
+end
+
 H.now = 1000
 function time()
     return H.now

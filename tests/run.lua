@@ -58,6 +58,7 @@ local function reset()
     P.mythicPlus.hideAll = false
     P.mythicPlus.useMinLevel = false
     P.mythicPlus.minLevel = 10
+    H.zone = H.defaultZone
     H.keystoneLevel = 0
     A.userAction = false
 end
@@ -429,6 +430,16 @@ ok(not H.isShown(), "hide dismisses the live prompt")
 H.printed = {}
 A:SlashCommand("hide")
 ok(#H.printed == 1 and H.printed[1]:find("no bonus roll") ~= nil, "hide reports when there is nothing to hide")
+
+-- /brg last, the only description of a roll the addon cannot place
+reset()
+H.zone = { name = "Harandar", instanceType = "none", difficultyID = 0, difficultyName = "", uiMapID = 2371 }
+roll({ spellID = 4242, difficultyID = 0, encounterID = 0, instanceID = 0 })
+H.printed = {}
+A:SlashCommand("last")
+ok(table.concat(H.printed, "\n"):find("spell 4242") ~= nil, "last reports the roll's spell")
+ok(table.concat(H.printed, "\n"):find("Harandar") ~= nil, "and the zone it arrived in")
+ok(table.concat(H.printed, "\n"):find("map 2371") ~= nil, "and the map, when nothing else identifies it")
 
 H.printed = {}
 A:SlashCommand("wat")

@@ -81,6 +81,7 @@ settle down and hidden rolls pass in silence.
 | `/brg hide` | Dismiss the prompt on screen, without changing settings |
 | `/brg toggle` | Turn filtering on and off |
 | `/brg status` | Print the current filters to chat |
+| `/brg last` | Describe the last roll the addon saw |
 
 ## Support
 
