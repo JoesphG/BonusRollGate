@@ -58,6 +58,7 @@ local function reset()
     P.mythicPlus.hideAll = false
     P.mythicPlus.useMinLevel = false
     P.mythicPlus.minLevel = 10
+    P.prey.hideAll = false
     H.zone = H.defaultZone
     H.keystoneLevel = 0
     A.userAction = false
@@ -153,6 +154,20 @@ ok(not H.isShown(), "show refuses once the prompt has expired")
 H.now = realNow
 
 --------------------------------------------------------------------------------
+-- A hunt's Normal/Hard/Nightmare tier is part of the quest name, so the prompt
+-- carries no difficulty at all: one switch, every tier.
+describe("prey hunts")
+reset()
+H.zone = H.outdoorZone
+ok(roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "a prey roll shows by default")
+P.prey.hideAll = true
+ok(not roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "and is hidden once prey is switched off")
+
+H.zone = H.defaultZone
+ok(roll({ difficultyID = D.MYTHIC, encounterID = BOSS.B, instanceID = 0 }), "a raid boss is left alone")
+ok(roll({ difficultyID = 0, encounterID = 0, instanceID = 0 }), "and so is a prompt that lost its fields in a raid")
+
+--------------------------------------------------------------------------------
 describe("a prompt re-issued after a loading screen keeps its identity")
 reset()
 P.difficulty[D.MYTHIC].encounters[BOSS.A] = true
@@ -189,6 +204,7 @@ ok(model.byKey.general ~= nil, "has a General page")
 ok(model.byKey.mythicplus ~= nil, "has a Mythic+ page")
 ok(model.byKey.dungeons ~= nil, "has a Dungeons page")
 ok(model.byKey.delves ~= nil, "has a Delves page")
+ok(model.byKey.prey ~= nil, "has a Prey page")
 ok(model.byKey.seen ~= nil, "has a Seen in play page")
 ok(model.byKey.other == nil, "and no Content types page, now that Delves stands alone")
 ok(model.byKey.profiles ~= nil, "has a Profiles page")
@@ -285,6 +301,12 @@ end
 local delves = H.page("delves")
 eq(#delves.sections[1].rows, 1, "Delves carries one switch")
 eq(delves.sections[1].rows[1].label, "Delves", "and it is its own")
+
+local preyPage = H.page("prey")
+eq(preyPage.sections[1].rows[1].kind, "check", "Prey carries one switch")
+P.prey.hideAll = true
+ok(preyPage.badge():find("all") ~= nil, "and its badge says so when set")
+P.prey.hideAll = false
 
 -- Unknown, so a roll at 250 still becomes filterable rather than being lost.
 -- Earlier tests have already met unknown difficulties, so clear the record to
@@ -384,7 +406,9 @@ reset()
 P.difficulty[D.MYTHIC].encounters[BOSS.A] = true
 P.difficulty[D.LFR].hide = true
 P.mythicPlus.hideAll = true
+P.prey.hideAll = true
 A:ClearAllFilters()
+eq(P.prey.hideAll, false, "prey filter cleared")
 eq(P.difficulty[D.MYTHIC].encounters[BOSS.A], false, "boss filters cleared")
 eq(P.difficulty[D.LFR].hide, false, "difficulty filters cleared")
 eq(P.mythicPlus.hideAll, false, "mythic+ filters cleared")

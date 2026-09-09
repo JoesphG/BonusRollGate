@@ -51,7 +51,7 @@ end)
 ok(ns.Panel.IsShown(), "and reports itself shown")
 
 local pages = ns.Model.Build(addon).pages
-ok(#pages == 12, "twelve pages: General, five raid, World Bosses, two dungeon, Delves, Seen in play, Profiles")
+ok(#pages == 13, "thirteen pages: General, five raid, World Bosses, two dungeon, Delves, Prey, Seen in play, Profiles")
 
 -- Twice over: the first pass builds each page, the second re-lays it out, which
 -- is where a pooled row that failed to reset would show up.

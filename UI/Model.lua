@@ -349,6 +349,50 @@ local function ListPage(addon, key, title, group, difficulties, sectionTitle)
     }
 end
 
+-- Prey hunts are quests in the open world. Their Normal/Hard/Nightmare tier is
+-- part of the quest name, not a difficulty the roll prompt carries, so one
+-- switch is the whole page.
+local function PreyPage(addon)
+    local colored, GREEN, RED = ns.colored, ns.GREEN, ns.RED
+
+    local function prey()
+        return addon.db.profile.prey
+    end
+
+    return {
+        key = "prey",
+        title = "Prey",
+        color = ns.PREY_COLOR,
+        group = "Other",
+        badge = function()
+            return prey().hideAll and colored("all", RED) or ""
+        end,
+        sections = {
+            {
+                title = "Hunts",
+                rows = {
+                    Check(
+                        "Hide bonus rolls from prey hunts",
+                        "Covers Normal, Hard and Nightmare -- the prompt does not say which hunt it came from.",
+                        function()
+                            return prey().hideAll
+                        end,
+                        function(value)
+                            prey().hideAll = value
+                        end
+                    ),
+                    Text(function()
+                        if prey().hideAll then
+                            return colored("Every prey bonus roll is hidden.", RED)
+                        end
+                        return colored("Every prey bonus roll will show.", GREEN)
+                    end),
+                },
+            },
+        },
+    }
+end
+
 -- Difficulties the addon has been offered a roll on that it ships no switch
 -- for. A checklist rather than a row each, so one met mid-session appears
 -- without a reload; the page hides itself while there are none.
@@ -533,9 +577,10 @@ function Model.Build(addon)
     pages[#pages + 1] =
         ListPage(addon, "dungeons", "Other difficulties", "Dungeons", ns.DUNGEON_DIFFICULTIES, "Hide bonus rolls from")
 
-    -- Delves are the only content type left with a switch of their own, so they
-    -- are a sidebar item rather than a "Content types" page holding one row.
+    -- Delves and Prey each carry one switch, so they are sidebar items of their
+    -- own rather than a "Content types" page holding a row apiece.
     pages[#pages + 1] = ListPage(addon, "delves", "Delves", "Other", ns.OTHER_DIFFICULTIES, "Hide bonus rolls from")
+    pages[#pages + 1] = PreyPage(addon)
     pages[#pages + 1] = SeenInPlayPage(addon)
 
     pages[#pages + 1] = ProfilesPage(addon)

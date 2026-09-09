@@ -26,7 +26,8 @@ ones worth reading. Nothing is lost — a hidden roll is only hidden, and
   actually offered at.
 - **Mythic+ keystone threshold.** Hide every Mythic+ roll, or only those below a
   keystone level you pick.
-- **Delves, dungeons and world bosses** each get their own switch.
+- **Delves, prey, dungeons and world bosses** each get their own switch. Prey covers Normal, Hard and Nightmare hunts in one tick, because the
+  prompt does not say which hunt it came from.
 - **Nothing is lost.** `/brg show` reopens a hidden roll.
 
 ## The General tab

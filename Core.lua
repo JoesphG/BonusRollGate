@@ -92,6 +92,9 @@ local defaults = {
             useMinLevel = false,
             minLevel = 10,
         },
+        prey = {
+            hideAll = false,
+        },
         difficulty = {
             ["*"] = {
                 hide = false,
@@ -330,6 +333,9 @@ local DIFFICULTY_COLOR = {
     [DIFF.WORLD_BOSS] = "ffff8000",
 }
 
+-- Prey has no difficulty of its own, so no place on the ramp above.
+local PREY_COLOR = "ffe6cc80"
+
 local GREY, GOLD, GREEN, RED = "ff808080", "ffffd100", "ff40dd60", "ffff6060"
 
 local function colored(text, hex)
@@ -345,6 +351,7 @@ ns.DifficultyName = DifficultyName
 ns.ColoredDifficulty = ColoredDifficulty
 ns.colored = colored
 ns.GREY, ns.GOLD, ns.GREEN, ns.RED = GREY, GOLD, GREEN, RED
+ns.PREY_COLOR = PREY_COLOR
 
 -- Bosses hidden at a difficulty, counting only the ones it lists. A tick left by
 -- an older, wider list is unreachable, but stays in the profile as a safety net.
@@ -402,6 +409,11 @@ function BonusRollGate:StatusText()
         total = total + 1
     end
 
+    if self.db.profile.prey.hideAll then
+        lines[#lines + 1] = colored("Prey", PREY_COLOR) .. colored(" - every roll", GREY)
+        total = total + 1
+    end
+
     if total == 0 then
         return colored("Nothing is filtered yet.", GREEN)
             .. " Every bonus roll will show. Pick bosses under Raids,"
@@ -420,6 +432,7 @@ function BonusRollGate:ClearAllFilters()
     end
     self.db.profile.mythicPlus.hideAll = false
     self.db.profile.mythicPlus.useMinLevel = false
+    self.db.profile.prey.hideAll = false
 end
 
 --------------------------------------------------------------------------------
@@ -523,6 +536,25 @@ function BonusRollGate:CaptureRollInfo(frame)
     return info
 end
 
+-- Prey hunts are quests out in the world: the prompt carries no difficulty and
+-- no encounter, and the hunt's own Normal/Hard/Nightmare tier lives on the
+-- quest, which the frame never sees. So the test is "a roll from outdoors that
+-- the client will not place", and one switch covers all three tiers.
+--
+-- The zone is half the test because a raid prompt re-issued after a loading
+-- screen also arrives without a difficulty.
+local function IsUnplacedOutdoorRoll(info)
+    if info.difficultyID and info.difficultyID ~= 0 then
+        return false
+    end
+    if info.encounterID and info.encounterID ~= 0 then
+        return false
+    end
+
+    local instanceType = info.zone and info.zone.instanceType
+    return instanceType == nil or instanceType == "none"
+end
+
 function BonusRollGate:ShouldHide(info)
     local profile = self.db.profile
     local difficultyID = info.difficultyID or 0
@@ -530,6 +562,10 @@ function BonusRollGate:ShouldHide(info)
     -- Flexible-size Mythic has no controls of its own; it obeys Mythic's.
     if difficultyID == DIFF.RAID_FLEX then
         difficultyID = DIFF.RAID_MYTHIC
+    end
+
+    if profile.prey.hideAll and IsUnplacedOutdoorRoll(info) then
+        return true
     end
 
     if difficultyID == DIFF.MYTHIC_PLUS then
