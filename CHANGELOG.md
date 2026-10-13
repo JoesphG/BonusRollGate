@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4
+
+### Changed
+
+- Interface 120105, for patch 12.1.5.
+
 ## 1.2.3
 
 ### Added
