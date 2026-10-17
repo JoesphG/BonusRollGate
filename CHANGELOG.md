@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5
+
+### Fixed
+
+- "Bonus roll hidden" printed repeatedly while a hidden roll was pending; it now prints once per roll.
+
 ## 1.2.4
 
 ### Changed
