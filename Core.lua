@@ -617,7 +617,13 @@ end
 function BonusRollGate:HideRoll()
     GroupLootContainer_RemoveFrame(GroupLootContainer, BonusRollFrame)
 
-    if self.db.profile.announce then
+    -- The prompt is re-shown while it is pending; say so once per roll.
+    local frame = BonusRollFrame
+    local key = table.concat({ frame.spellID or 0, frame.encounterID or 0, frame.endTime or 0 }, ":")
+    local repeated = key == self.announcedKey
+    self.announcedKey = key
+
+    if self.db.profile.announce and not repeated then
         self:Print('Bonus roll hidden, type "/brg show" to open it again.')
     end
 end
